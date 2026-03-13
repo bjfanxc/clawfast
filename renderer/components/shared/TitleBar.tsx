@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { Minus, Square, X, Moon, Sun, Languages } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
@@ -49,8 +50,8 @@ export default function TitleBar() {
   return (
     <div className="draggable app-soft-surface flex h-16 w-full shrink-0 items-center justify-between border-b px-4">
       <div className="flex items-center gap-3 pl-1">
-        <div className="app-solid-primary flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-semibold">
-          CF
+        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl">
+          <Image src="/images/logo.png" alt="ClawFast" width={40} height={40} className="h-10 w-10 object-cover" priority />
         </div>
         <div className="space-y-0.5">
           <div className="text-lg font-semibold tracking-tight">ClawFast</div>

@@ -23,6 +23,11 @@ const shouldOpenDevTools = process.env.OPEN_DEVTOOLS === '1'
 const GATEWAY_PORT = 18789
 const openClawWsUrl = process.env.OPENCLAW_WS_URL?.trim() || `ws://localhost:${GATEWAY_PORT}`
 
+const getWindowIconPath = () => {
+  const baseDir = app.isPackaged ? process.resourcesPath : process.cwd()
+  return path.join(baseDir, 'resources', 'favicon.ico')
+}
+
 const gatewayClient = new GatewayClient({
   port: GATEWAY_PORT,
   wsUrl: openClawWsUrl,
@@ -49,6 +54,7 @@ if (isProd) {
     height: 900,
     frame: false,
     autoHideMenuBar: true,
+    icon: getWindowIconPath(),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

@@ -23,7 +23,7 @@ extraResources:
 publish: null
 win:
   target: nsis
-  icon: resources/clawfast.png
+  icon: resources/favicon.ico
   legalTrademarks: ""
   signAndEditExecutable: false
 nsis:

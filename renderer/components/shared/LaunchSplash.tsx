@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
 
 const SPLASH_DURATION_MS = 1900
@@ -48,8 +49,8 @@ export default function LaunchSplash() {
 
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="flex flex-col items-center gap-5 px-6 text-center">
-          <div className="launch-splash-logo app-soft-surface flex h-16 w-16 items-center justify-center rounded-[24px] text-xl font-semibold shadow-[0_24px_60px_-34px_hsl(var(--primary)/0.32)]">
-            CF
+          <div className="launch-splash-logo flex h-16 w-16 items-center justify-center overflow-hidden rounded-[24px] shadow-[0_24px_60px_-34px_hsl(var(--primary)/0.32)]">
+            <Image src="/images/logo.png" alt="ClawFast" width={64} height={64} className="h-16 w-16 object-cover" priority />
           </div>
 
           <div className="space-y-2">
