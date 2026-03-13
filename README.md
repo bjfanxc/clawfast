@@ -1,76 +1,156 @@
-# ClawFast
+<p align="center">
+  <img src="resources/clawfast.png" width="128" height="128" alt="ClawFast Logo" />
+</p>
 
-> A productized desktop admin console for OpenClaw, built for long-term operations.
->
-> 面向长期运维的 OpenClaw 桌面管理控制台。
+<h1 align="center">ClawFast</h1>
 
-## Overview | 项目简介
+<p align="center">
+  <strong>The Desktop Admin Console for OpenClaw</strong>
+</p>
 
-ClawFast is a desktop management layer around OpenClaw. It is designed for teams who want a more stable, productized workflow for configuration, operations, and day-to-day administration.
+<p align="center">
+  A cleaner, more operational way to manage OpenClaw on desktop.
+</p>
 
-ClawFast 是围绕 OpenClaw 构建的桌面管理层，重点不是替代 OpenClaw 本身，而是提供更稳定、更产品化的配置、运维和日常管理体验。
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#getting-started">Getting Started</a> ·
+  <a href="#packaging">Packaging</a> ·
+  <a href="#project-structure">Project Structure</a> ·
+  <a href="#roadmap">Roadmap</a> ·
+  <a href="#contact">Contact</a>
+</p>
 
-Current integration target | 当前集成版本:
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-4b5563" alt="Platform" />
+  <img src="https://img.shields.io/badge/electron-34+-47848F?logo=electron&logoColor=white" alt="Electron" />
+  <img src="https://img.shields.io/badge/next.js-14-111111?logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=111111" alt="React" />
+  <img src="https://img.shields.io/badge/license-MIT-16a34a" alt="License" />
+</p>
+
+<p align="center">
+  English | 简体中文
+</p>
+
+---
+
+## Overview
+
+**ClawFast** is a productized desktop admin console built around OpenClaw. It is designed for teams and operators who want a steadier, more visual workflow for model routing, channel access, scheduled jobs, session inspection, usage review, and daily maintenance.
+
+Instead of pushing everything through config files and terminal-first flows, ClawFast brings the most common OpenClaw management tasks into a focused desktop interface that is easier to operate, easier to verify, and easier to hand over across teams.
+
+当前集成版本：
 
 - `openclaw@2026.3.2`
 
-## Screenshots | 界面截图
+### Why ClawFast
 
-### Dashboard
+| Need | ClawFast Approach |
+|---|---|
+| Routine operations | A unified desktop console for configuration, channels, cron jobs, sessions, and usage |
+| Safer changes | Readable forms, previews, and validation before writing config |
+| Faster onboarding | Productized UI instead of requiring every user to understand internal config structure |
+| Daily visibility | Dashboard, usage inspection, session history, and config preview in one place |
 
-![Dashboard](./resources/screenshot/dashboard.png)
+---
 
-### Chat
+## Screenshots
 
-![Chat](./resources/screenshot/chat.png)
+<p align="center">
+  <img src="resources/screenshot/dashboard.png" style="width: 100%; height: auto;" alt="Dashboard" />
+</p>
 
-### Channels
+<p align="center">
+  <img src="resources/screenshot/chat.png" style="width: 100%; height: auto;" alt="Chat" />
+</p>
 
-![Channels](./resources/screenshot/channel.png)
+<p align="center">
+  <img src="resources/screenshot/channel.png" style="width: 100%; height: auto;" alt="Channels" />
+</p>
 
-### Models
+<p align="center">
+  <img src="resources/screenshot/model.png" style="width: 100%; height: auto;" alt="Models" />
+</p>
 
-![Models](./resources/screenshot/model.png)
+<p align="center">
+  <img src="resources/screenshot/cron.png" style="width: 100%; height: auto;" alt="Scheduled Tasks" />
+</p>
 
-### Scheduled Tasks
+<p align="center">
+  <img src="resources/screenshot/session.png" style="width: 100%; height: auto;" alt="Sessions" />
+</p>
 
-![Scheduled Tasks](./resources/screenshot/cron.png)
+<p align="center">
+  <img src="resources/screenshot/skills.png" style="width: 100%; height: auto;" alt="Skills" />
+</p>
 
-### Sessions
+<p align="center">
+  <img src="resources/screenshot/usage.png" style="width: 100%; height: auto;" alt="Usage" />
+</p>
 
-![Sessions](./resources/screenshot/session.png)
+---
 
-### Skills
+## Features
 
-![Skills](./resources/screenshot/skills.png)
+### Provider-Based Model Configuration
 
-### Usage
+Configure model providers, maintain model lists, and manage route selection through a visual flow instead of editing raw config by hand.
 
-![Usage](./resources/screenshot/usage.png)
+### Scheduled Task Management
 
-## Highlights | 核心能力
+Create and edit scheduled jobs in modal flows, with support for both regular creation and advanced creation paths.
 
-- Two packaging modes: bundled OpenClaw and `admin-only`
-- Gateway unavailable fallback with warning banner and retry action
-- Reworked model configuration based on providers and routing
-- Scheduled task management with modal-based regular / advanced creation
-- Desktop UI with light and dark theme support
-- Chinese and English localization foundation
+### Channel Operations
 
-- 双打包模式：内置 OpenClaw 与 `admin-only`
-- Gateway 断连降级：页面可继续访问，顶部告警并支持重试
-- 模型配置已重构为“模型供应商 + 模型路由”
-- 定时任务基于弹出层创建，支持普通创建与高级创建
-- 支持亮色 / 暗色桌面界面
-- 具备中英文基础能力
+Manage multi-platform channel configuration in one place, with a consistent add-flow and clearer status display.
 
-## Packaging Modes | 打包模式
+### Session And Usage Visibility
+
+Inspect sessions, message history, usage totals, charts, and config snapshots from the same desktop console.
+
+### Desktop-First Experience
+
+ClawFast supports light and dark themes, Chinese and English UI, and packaging modes for different deployment styles.
+
+---
+
+## Getting Started
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start development
+
+```bash
+npm run dev
+```
+
+### Run type check
+
+```bash
+npm run typecheck
+```
+
+### Build renderer
+
+```bash
+npm run build:renderer
+```
+
+---
+
+## Packaging
 
 ### With OpenClaw
 
 Bundles OpenClaw into the desktop app. ClawFast can start the bundled gateway on demand.
-
-将 OpenClaw 一并打入桌面应用，ClawFast 可按需拉起内置 gateway。
 
 ```bash
 npm run package:win
@@ -80,47 +160,13 @@ npm run package:win
 
 Packages ClawFast as a pure management console. It does not automatically start a gateway.
 
-作为纯管理端打包，不自动拉起 gateway，适合连接已有 OpenClaw 环境。
-
 ```bash
 npm run package:win:admin
 ```
 
-## Quick Start | 快速开始
-
-### Install dependencies | 安装依赖
+You can also package for other platforms:
 
 ```bash
-npm install
-```
-
-### Start development | 启动开发环境
-
-```bash
-npm run dev
-```
-
-### Run type check | 执行类型检查
-
-```bash
-npm run typecheck
-```
-
-## Build And Package | 构建与打包
-
-### Build | 构建
-
-```bash
-npm run build
-npm run build:admin
-```
-
-### Package | 打包
-
-```bash
-npm run package:win
-npm run package:win:admin
-
 npm run package:mac
 npm run package:mac:admin
 
@@ -128,50 +174,9 @@ npm run package:linux
 npm run package:linux:admin
 ```
 
-## Key Areas | 重点模块
+---
 
-### Gateway State | Gateway 状态
-
-Gateway availability is exposed through local IPC instead of OpenClaw RPC.
-
-Gateway 状态由本地 IPC 提供，而不是直接走 OpenClaw RPC。
-
-- renderer: `window.ipc.gateway.getState()`
-- main process: `gatewayClient.isConnected()`
-- actual signal: WebSocket `OPEN`
-
-### Model Configuration | 模型配置
-
-The model page is organized around:
-
-- model providers | 模型供应商
-- model routing | 模型路由
-
-Current provider flow supports viewing configured providers, adding a provider in a modal, filling provider-specific fields, and validating required inputs before save.
-
-当前供应商流程支持查看已配置项、通过弹层新增供应商、填写各供应商所需字段，并在保存前完成必要校验。
-
-### Scheduled Tasks | 定时任务
-
-The scheduled task page is aligned with the current OpenClaw cron job structure.
-
-定时任务页面已按当前 OpenClaw cron job 结构进行重构。
-
-Current behavior includes:
-
-- modal-based task creation instead of inline editing
-- regular create and advanced create modes
-- linked field behavior for schedule, payload, session target, wake mode, and delivery
-- validation for `announce`, `webhook`, and one-shot task behavior
-
-当前已支持：
-
-- 使用弹层创建任务，不再占用主内容区
-- 普通创建与高级创建两种模式
-- `schedule`、`payload`、`sessionTarget`、`wakeMode`、`delivery` 等字段联动
-- `announce`、`webhook` 和一次性任务相关校验
-
-## Project Structure | 目录结构
+## Project Structure
 
 ```text
 main/       Electron main process, gateway integration, IPC
@@ -181,15 +186,9 @@ scripts/    Build, packaging, OpenClaw bundling, Node runtime bundling
 resources/  Icons, screenshots, and packaging resources
 ```
 
-## Useful Scripts | 常用脚本
+---
 
-```bash
-npm run bundle:node-runtime
-npm run bundle:openclaw
-npm run prune:openclaw
-```
-
-## Tech Stack | 技术栈
+## Tech Stack
 
 - Electron
 - Nextron
@@ -199,9 +198,11 @@ npm run prune:openclaw
 - Tailwind CSS
 - OpenClaw
 
-## Release Checklist | 发布检查
+---
 
-Before publishing a release:
+## Release Checklist
+
+Before publishing a release, verify at least the following:
 
 - packaged app connects to the expected gateway target
 - bundled OpenClaw mode starts the bundled gateway correctly
@@ -210,31 +211,67 @@ Before publishing a release:
 - scheduled tasks can be created, edited, disabled, and deleted correctly
 - packaged icons and Windows taskbar identity are correct
 
-发布前建议至少确认以下内容：
+---
 
-- 打包后的应用连接到预期的 gateway
-- 内置 OpenClaw 模式能正确启动 bundled gateway
-- `admin-only` 模式不会自动启动 OpenClaw
-- 模型供应商配置可正确保存和加载
-- 定时任务可正常创建、编辑、禁用和删除
-- 打包图标和 Windows 任务栏身份显示正确
+## Roadmap
 
-## Roadmap | 后续计划
+- Continue refining provider configuration and route management
+- Improve scheduled task editing, validation, and advanced fields
+- Keep unifying desktop visual language across all major pages
+- Polish packaging, release readiness, and onboarding documentation
+- Expand operational visibility for channels, sessions, and usage
 
-- Continue refining model provider configuration
-- Improve model route selection experience
-- Keep polishing scheduled task validation and advanced configuration
-- Further unify desktop visual language across pages
-- Improve packaging, documentation, and release readiness
+---
 
-- 继续完善模型供应商配置体验
-- 优化模型路由选择交互
-- 持续打磨定时任务高级配置与校验
-- 进一步统一桌面端页面视觉语言
-- 提升打包、文档和发布完善度
+## Contributing
 
-## License | 许可证
+Contributions are welcome. If you want to improve ClawFast, a good starting point is:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Keep changes focused and easy to review.
+4. Run type checks before submitting.
+5. Open a pull request with a clear summary.
+
+---
+
+## Contact
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="resources/contactme/feishu.png" width="180" alt="Feishu" />
+      <br />
+      <strong>Feishu</strong>
+      <br />
+      Product updates and direct communication.
+    </td>
+    <td align="center">
+      <img src="resources/contactme/wechat.png" width="180" alt="Enterprise WeChat" />
+      <br />
+      <strong>Enterprise WeChat</strong>
+      <br />
+      Business contact and collaboration.
+    </td>
+    <td align="center">
+      <img src="resources/contactme/discord.png" width="180" alt="Discord" />
+      <br />
+      <strong>Discord</strong>
+      <br />
+      Community discussion and support.
+    </td>
+    <td align="center">
+      <img src="resources/contactme/whatsapp.png" width="180" alt="WhatsApp" />
+      <br />
+      <strong>WhatsApp</strong>
+      <br />
+      Fast mobile contact.
+    </td>
+  </tr>
+</table>
+
+---
+
+## License
 
 This project is licensed under the [MIT License](./LICENSE).
-
-本项目基于 [MIT License](./LICENSE) 开源。
