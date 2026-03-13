@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="./resources/clawfast.png" alt="ClawFast" width="140" />
-</p>
-
 # ClawFast
 
 > A productized desktop admin console for OpenClaw, built for long-term operations.
