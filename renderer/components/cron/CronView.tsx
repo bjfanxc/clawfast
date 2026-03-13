@@ -372,6 +372,10 @@ function DropdownField({ value, onChange, options }: { value: string; onChange: 
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [open])
 
+  React.useEffect(() => {
+    setOpen(false)
+  }, [value])
+
   return (
     <div ref={rootRef} className='relative'>
       <button type='button' className='flex h-11 w-full items-center justify-between rounded-2xl border border-input bg-background px-3 text-left text-sm text-foreground transition hover:border-ring/40 dark:bg-slate-950/65' onClick={() => setOpen((current) => !current)}>
@@ -379,12 +383,24 @@ function DropdownField({ value, onChange, options }: { value: string; onChange: 
         <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition', open && 'rotate-180')} />
       </button>
       {open ? (
-        <div className='absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/80 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]'>
+        <div className='absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/90 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]'>
           <div className='max-h-64 overflow-y-auto p-1'>
             {options.map((option) => (
-              <button key={option.value} type='button' className={cn('flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition', option.value === value ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-100' : 'text-foreground hover:bg-muted/70')} onClick={() => { onChange(option.value); setOpen(false) }}>
+              <button
+                key={option.value}
+                type='button'
+                className={cn('flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition', option.value === value ? 'bg-primary/10 text-foreground' : 'text-foreground hover:bg-muted/70')}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  setOpen(false)
+                }}
+                onClick={() => {
+                  setOpen(false)
+                  onChange(option.value)
+                }}
+              >
                 <span className='truncate'>{option.label}</span>
-                {option.value === value ? <Check className='ml-3 h-4 w-4 shrink-0' /> : null}
+                {option.value === value ? <Check className='ml-3 h-4 w-4 shrink-0 text-primary' /> : null}
               </button>
             ))}
           </div>
@@ -410,6 +426,10 @@ function ModelField({ value, onChange, options, placeholder }: { value: string; 
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [open])
 
+  React.useEffect(() => {
+    setOpen(false)
+  }, [value])
+
   return (
     <div ref={rootRef} className='relative'>
       <button type='button' className='pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground' tabIndex={-1}>
@@ -417,12 +437,24 @@ function ModelField({ value, onChange, options, placeholder }: { value: string; 
       </button>
       <Input value={value} placeholder={placeholder} onFocus={() => setOpen(true)} onChange={(event) => { onChange(event.target.value); setOpen(true) }} className='h-11 rounded-2xl pr-10 dark:bg-slate-950/65' />
       {open && filteredOptions.length ? (
-        <div className='absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/80 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]'>
+        <div className='absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/90 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]'>
           <div className='max-h-64 overflow-y-auto p-1'>
             {filteredOptions.map((option) => (
-              <button key={option} type='button' className={cn('flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition', option === value ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-100' : 'text-foreground hover:bg-muted/70')} onClick={() => { onChange(option); setOpen(false) }}>
+              <button
+                key={option}
+                type='button'
+                className={cn('flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition', option === value ? 'bg-primary/10 text-foreground' : 'text-foreground hover:bg-muted/70')}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  setOpen(false)
+                }}
+                onClick={() => {
+                  setOpen(false)
+                  onChange(option)
+                }}
+              >
                 <span className='truncate'>{option}</span>
-                {option === value ? <Check className='ml-3 h-4 w-4 shrink-0' /> : null}
+                {option === value ? <Check className='ml-3 h-4 w-4 shrink-0 text-primary' /> : null}
               </button>
             ))}
           </div>
@@ -447,10 +479,10 @@ function SummaryCard({
 }) {
   const toneClasses =
     tone === 'emerald'
-      ? 'border border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-400/18 dark:bg-emerald-500/18 dark:text-emerald-100'
+      ? 'border border-emerald-200/80 bg-card text-emerald-600 dark:border-emerald-400/24 dark:bg-card dark:text-emerald-300'
       : tone === 'amber'
-        ? 'border border-amber-100 bg-amber-50 text-amber-700 dark:border-amber-400/18 dark:bg-amber-500/18 dark:text-amber-100'
-        : 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100'
+        ? 'border border-amber-200/80 bg-card text-amber-600 dark:border-amber-400/24 dark:bg-card dark:text-amber-300'
+        : 'border border-border/80 bg-card text-foreground'
 
   return (
     <div className='rounded-[24px] border border-border/80 bg-card/95 p-4 shadow-sm dark:bg-card/85'>
@@ -460,8 +492,8 @@ function SummaryCard({
           <div className='text-2xl font-bold tracking-tight text-foreground'>{value}</div>
           <div className='text-xs leading-6 text-muted-foreground'>{hint}</div>
         </div>
-        <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl shadow-sm', toneClasses)}>
-          <Icon className='h-[18px] w-[18px]' />
+        <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl', toneClasses)}>
+          <Icon className='h-5 w-5' />
         </div>
       </div>
     </div>
@@ -511,9 +543,16 @@ function TaskEditorDialog({
   const showWebhook = isAgentTurn && form.deliveryMode === 'webhook'
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-950/38 px-4 py-6 backdrop-blur-sm'>
-      <div className='flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_32px_80px_-30px_rgba(15,23,42,0.35)] dark:border-white/10 dark:bg-slate-950'>
-        <div className='flex items-start justify-between gap-4 border-b border-border/70 px-6 py-5'>
+    <div
+      className='app-overlay-scrim fixed inset-0 z-50 flex items-center justify-center px-4 py-6 backdrop-blur-sm'
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div className='app-dialog-shell flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-[32px]'>
+        <div className='app-dialog-section flex items-start justify-between gap-4 border-b px-6 py-5'>
           <div className='space-y-2'>
             <div className='text-2xl font-bold text-foreground'>{isEditing ? '编辑任务' : '创建任务'}</div>
             <div className='text-sm text-muted-foreground'>创建任务通过弹出层完成，普通模式适合常规任务，高阶模式适合完整配置。</div>
@@ -523,7 +562,7 @@ function TaskEditorDialog({
           </button>
         </div>
 
-        <div className='border-b border-border/70 px-6 py-4'>
+        <div className='app-dialog-section border-b px-6 py-4'>
           <div className='inline-flex rounded-xl bg-muted p-1'>
             {([
               { key: 'regular', label: '普通创建' },
@@ -594,7 +633,7 @@ function TaskEditorDialog({
           </div>
         </div>
 
-        <div className='flex items-center justify-between gap-3 border-t border-border/70 px-6 py-5'>
+        <div className='app-dialog-section flex items-center justify-between gap-3 border-t px-6 py-5'>
           <div className='text-xs text-muted-foreground'>{isAt ? '单次任务默认会在执行后删除。' : isAgentTurn ? '独立执行任务会根据投递配置决定是否发送结果。' : '主会话提醒会自动绑定到主会话和 systemEvent。'}</div>
           <div className='flex items-center gap-3'>
             <Button variant='outline' className='rounded-2xl px-4' onClick={onClose} disabled={busy}>取消</Button>

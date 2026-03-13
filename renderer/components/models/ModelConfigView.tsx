@@ -463,7 +463,7 @@ function DropdownField({
         <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition', open && 'rotate-180')} />
       </button>
       {open ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/80 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-border/90 bg-popover shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]">
           <div className="max-h-64 overflow-y-auto p-1">
             {options.map((option) => (
               <button
@@ -471,17 +471,15 @@ function DropdownField({
                 type="button"
                 className={cn(
                   'flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition',
-                  option.value === value
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-100'
-                    : 'text-foreground hover:bg-muted/70',
+                  option.value === value ? 'bg-primary/10 text-foreground' : 'text-foreground hover:bg-muted/70',
                 )}
                 onClick={() => {
-                  onChange(option.value)
                   setOpen(false)
+                  onChange(option.value)
                 }}
               >
                 <span className="truncate">{option.label}</span>
-                {option.value === value ? <Check className="ml-3 h-4 w-4 shrink-0" /> : null}
+                {option.value === value ? <Check className="ml-3 h-4 w-4 shrink-0 text-primary" /> : null}
               </button>
             ))}
           </div>
@@ -995,9 +993,9 @@ export default function ModelConfigView() {
 
       <Dialog.Root open={providerEditor.open} onOpenChange={(open) => (open ? undefined : closeEditor())}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 dark:bg-slate-950/65" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex max-h-[86vh] w-[min(920px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] border border-white/70 bg-white outline-none shadow-[0_32px_80px_-30px_rgba(15,23,42,0.35)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 dark:border-white/10 dark:bg-slate-950 dark:shadow-[0_40px_120px_-36px_rgba(15,23,42,0.95)]">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 dark:border-white/10">
+          <Dialog.Overlay className="app-overlay-scrim fixed inset-0 z-50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <Dialog.Content className="app-dialog-shell fixed left-1/2 top-1/2 z-50 flex max-h-[86vh] w-[min(920px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+            <div className="app-dialog-section flex items-start justify-between gap-4 border-b px-6 py-5">
               <div className="space-y-2">
                 <Dialog.Title className="text-xl font-semibold tracking-tight text-foreground">
                   {t(providerEditor.mode === 'edit' ? 'models.providerEditorTitleEdit' : 'models.providerEditorTitleCreate')}
@@ -1147,7 +1145,7 @@ export default function ModelConfigView() {
               ) : null}
             </div>
 
-            <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-6 py-4 dark:border-white/10">
+            <div className="app-dialog-section flex items-center justify-between gap-3 border-t px-6 py-4">
               <div>
                 {providerEditor.step === 'form' && providerEditor.mode === 'create' ? (
                   <Button
