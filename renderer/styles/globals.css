@@ -180,38 +180,52 @@
     --border: 214 32% 88%;
     --input: 214 32% 88%;
     --ring: 220 79% 57%;
+    --surface: 0 0% 100%;
+    --surface-foreground: 220 39% 14%;
+    --surface-muted: 214 44% 95%;
+    --surface-soft: 214 52% 96%;
+    --surface-strong: 214 56% 92%;
+    --status-danger: 0 84.2% 60.2%;
+    --status-danger-foreground: 210 40% 98%;
 
     --radius: 1rem;
   }
 
   .dark {
-    --background: 221 38% 8%;
+    --background: 222 30% 9%;
     --foreground: 214 32% 96%;
 
-    --card: 222 32% 11%;
+    --card: 222 24% 12%;
     --card-foreground: 214 32% 96%;
 
-    --popover: 222 32% 11%;
+    --popover: 222 24% 12%;
     --popover-foreground: 214 32% 96%;
 
     --primary: 216 85% 64%;
     --primary-foreground: 222 47% 10%;
 
-    --secondary: 221 27% 16%;
+    --secondary: 222 18% 16%;
     --secondary-foreground: 214 32% 96%;
 
-    --muted: 221 24% 15%;
-    --muted-foreground: 217 14% 68%;
+    --muted: 222 18% 15%;
+    --muted-foreground: 217 12% 70%;
 
-    --accent: 221 30% 18%;
+    --accent: 222 18% 18%;
     --accent-foreground: 214 32% 96%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 21% 23%;
-    --input: 220 21% 23%;
+    --border: 220 16% 24%;
+    --input: 220 16% 24%;
     --ring: 216 85% 64%;
+    --surface: 222 24% 12%;
+    --surface-foreground: 214 32% 96%;
+    --surface-muted: 222 18% 15%;
+    --surface-soft: 222 18% 16%;
+    --surface-strong: 222 18% 19%;
+    --status-danger: 0 62.8% 30.6%;
+    --status-danger-foreground: 210 40% 98%;
   }
 }
 
@@ -233,9 +247,9 @@
 
   .dark body {
     background-image:
-      radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 25%),
-      radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 20%),
-      linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 1));
+      radial-gradient(circle at top left, hsl(var(--primary) / 0.14), transparent 26%),
+      radial-gradient(circle at top right, hsl(var(--accent-foreground) / 0.05), transparent 20%),
+      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(222 32% 6% / 1));
   }
 
   #__next {
@@ -263,7 +277,10 @@
 
 @layer components {
   .app-panel {
-    @apply rounded-[28px] border border-white/70 bg-white/90 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.35)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60;
+    @apply rounded-[28px] backdrop-blur-xl;
+    border-color: hsl(var(--border) / 0.65);
+    background-color: hsl(var(--card) / 0.9);
+    box-shadow: 0 24px 80px -36px rgba(15, 23, 42, 0.35);
   }
 
   .app-subpanel {
@@ -276,5 +293,143 @@
 
   .app-section-subtitle {
     @apply text-sm leading-6 text-muted-foreground;
+  }
+
+  .app-solid-primary {
+    @apply text-primary-foreground;
+    background-color: hsl(var(--primary));
+    box-shadow: 0 18px 40px -24px hsl(var(--primary) / 0.65);
+  }
+
+  .app-solid-primary:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+
+  .app-soft-surface {
+    @apply border backdrop-blur-xl;
+    border-color: hsl(var(--border) / 0.7);
+    background-color: hsl(var(--card) / 0.88);
+  }
+
+  .app-soft-button {
+    @apply border text-foreground;
+    border-color: hsl(var(--border) / 0.7);
+    background-color: hsl(var(--card) / 0.72);
+  }
+
+  .app-soft-button:hover {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .app-nav-active {
+    @apply bg-accent text-accent-foreground ring-1 ring-border;
+  }
+
+  .app-nav-idle {
+    @apply text-muted-foreground hover:bg-accent/70 hover:text-foreground;
+  }
+
+  .app-history-active {
+    @apply border border-border bg-card text-foreground shadow-sm;
+  }
+
+  .app-history-idle {
+    @apply text-muted-foreground hover:bg-accent/60 hover:text-foreground;
+  }
+
+  .app-toast {
+    @apply border text-card-foreground backdrop-blur-sm;
+    background-color: hsl(var(--card) / 0.95);
+  }
+
+  .app-toast-primary {
+    @apply text-foreground;
+    border-color: hsl(var(--primary) / 0.2);
+    background-color: hsl(var(--primary) / 0.08);
+  }
+
+  .app-toast-info {
+    @apply text-foreground;
+    border-color: hsl(var(--border) / 0.85);
+    background-color: hsl(var(--accent) / 0.55);
+  }
+
+  .app-toast-danger {
+    @apply text-foreground;
+    border-color: hsl(var(--destructive) / 0.25);
+    background-color: hsl(var(--destructive) / 0.1);
+  }
+
+  .app-status-warning {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .app-dialog-shell {
+    @apply border;
+    border-color: hsl(var(--border) / 0.9);
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.98), hsl(var(--surface) / 0.96));
+    box-shadow:
+      0 34px 100px -42px rgba(15, 23, 42, 0.55),
+      inset 0 1px 0 hsl(var(--foreground) / 0.04);
+  }
+
+  .app-dialog-section {
+    border-color: hsl(var(--border) / 0.75);
+  }
+
+  .app-dialog-subtle {
+    @apply border;
+    border-color: hsl(var(--border) / 0.8);
+    background:
+      linear-gradient(180deg, hsl(var(--surface-soft) / 0.82), hsl(var(--surface-muted) / 0.74));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.025);
+  }
+
+  .app-dialog-code {
+    @apply border;
+    border-color: hsl(var(--border) / 0.82);
+    background:
+      linear-gradient(180deg, hsl(var(--surface-strong) / 0.92), hsl(var(--surface-soft) / 0.96));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.03),
+      0 18px 40px -34px rgba(15, 23, 42, 0.55);
+  }
+
+  .app-selection-card {
+    @apply border text-foreground;
+    border-color: hsl(var(--border) / 0.8);
+    background-color: hsl(var(--card) / 0.9);
+  }
+
+  .app-selection-card:hover {
+    border-color: hsl(var(--border) / 1);
+  }
+
+  .app-selection-card-active {
+    @apply border text-foreground;
+    border-color: hsl(var(--primary) / 0.35);
+    background-color: hsl(var(--primary) / 0.14);
+    box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.12);
+  }
+
+  .app-selection-chip {
+    @apply border text-foreground;
+    border-color: hsl(var(--border) / 0.8);
+    background-color: hsl(var(--card) / 0.9);
+  }
+
+  .app-selection-chip:hover {
+    border-color: hsl(var(--border) / 1);
+  }
+
+  .app-selection-chip-active {
+    @apply border text-foreground;
+    border-color: hsl(var(--primary) / 0.35);
+    background-color: hsl(var(--primary) / 0.14);
+  }
+
+  .app-overlay-scrim {
+    background-color: hsl(222 32% 6% / 0.52);
   }
 }

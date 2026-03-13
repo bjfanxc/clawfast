@@ -109,12 +109,12 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "flex h-full flex-col overflow-hidden border-r border-white/60 bg-white/48 px-3 py-4 backdrop-blur-xl transition-all dark:border-white/10 dark:bg-slate-950/28",
+      "app-soft-surface flex h-full flex-col overflow-hidden border-r px-3 py-4 transition-all",
       sidebarCollapsed ? "w-24" : "w-72"
     )}>
       <div className="flex shrink-0 flex-col gap-1">
         <Button
-            className="mb-2 w-full justify-start gap-3 rounded-2xl bg-blue-600 text-white shadow-[0_18px_40px_-24px_rgba(37,99,235,1)] hover:bg-blue-700"
+            className="app-solid-primary mb-2 w-full justify-start gap-3 rounded-2xl"
             onClick={() => { createSession(); setCurrentView('chat') }}
         >
             <MessageSquarePlus className="h-4 w-4" />
@@ -129,8 +129,8 @@ export default function Sidebar() {
               "w-full gap-3 rounded-2xl px-3 py-2.5",
               sidebarCollapsed ? "justify-center" : "justify-start",
               currentView === item.id
-                ? "bg-blue-50 text-blue-700 ring-1 ring-blue-100 dark:bg-blue-950/40 dark:text-blue-200 dark:ring-blue-900/60"
-                : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/5"
+                ? "app-nav-active"
+                : "app-nav-idle"
             )}
             onClick={item.action}
           >
@@ -154,8 +154,8 @@ export default function Sidebar() {
                   className={cn(
                     "h-auto w-full justify-start rounded-2xl px-3 py-3 text-sm",
                     currentSessionId === session.id 
-                      ? "border border-slate-200 bg-slate-50 text-foreground shadow-sm dark:border-slate-800 dark:bg-slate-900/80" 
-                      : "text-muted-foreground hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-900/70"
+                      ? "app-history-active" 
+                      : "app-history-idle"
                   )}
                   onClick={async () => {
                     setLoadingHistoryId(session.id)
@@ -196,8 +196,8 @@ export default function Sidebar() {
               className={cn(
                 "h-10 w-10 rounded-2xl",
                 currentSessionId === session.id
-                  ? "border border-slate-200 bg-slate-50 text-foreground shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
-                  : "text-muted-foreground hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-900/70"
+                  ? "app-history-active"
+                  : "app-history-idle"
               )}
               onClick={async () => {
                 setLoadingHistoryId(session.id)
@@ -227,12 +227,12 @@ export default function Sidebar() {
         </div>
       )}
 
-      <div className="mt-4 flex shrink-0 items-center justify-between rounded-2xl border border-white/60 bg-white/55 px-2 py-2 dark:border-white/10 dark:bg-white/5">
+      <div className="mt-4 flex shrink-0 items-center justify-between rounded-2xl border border-border/70 bg-card/72 px-2 py-2">
         <Button
           type="button"
           variant="ghost"
           className={cn(
-            'h-9 rounded-xl px-2 text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10',
+            'h-9 rounded-xl px-2 text-muted-foreground hover:bg-accent hover:text-foreground',
             sidebarCollapsed ? 'w-9 justify-center px-0' : 'flex-1 justify-start gap-2'
           )}
           onClick={() => setConfigPreviewOpen(true)}

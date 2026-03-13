@@ -36,11 +36,11 @@ export default function GatewayRequiredState({
 
   if (compact) {
     return (
-      <Card className={cn('rounded-[24px] border-amber-200/80 bg-amber-50/70 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/20', className)}>
+      <Card className={cn('rounded-[24px] border-border/80 bg-card/80 shadow-sm', className)}>
         <CardContent className="flex flex-col gap-4 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-200">
+              <div className="app-status-warning flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl">
                 {checking ? <Loader2 className="h-5 w-5 animate-spin" /> : <AlertTriangle className="h-5 w-5" />}
               </div>
               <div className="min-w-0">
@@ -81,7 +81,7 @@ export default function GatewayRequiredState({
   return (
     <Card className={cn('rounded-[28px] border-border/80 shadow-sm', className)}>
       <CardContent className="flex min-h-[260px] flex-col items-center justify-center px-6 py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-200">
+        <div className="app-status-warning flex h-14 w-14 items-center justify-center rounded-2xl">
           <AlertTriangle className="h-6 w-6" />
         </div>
         <div className="mt-5 text-xl font-semibold text-foreground">{title}</div>

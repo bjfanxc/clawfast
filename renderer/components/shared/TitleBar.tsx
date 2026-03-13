@@ -47,9 +47,9 @@ export default function TitleBar() {
   }
 
   return (
-    <div className="draggable flex h-16 w-full shrink-0 items-center justify-between border-b border-white/60 bg-white/72 px-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/55">
+    <div className="draggable app-soft-surface flex h-16 w-full shrink-0 items-center justify-between border-b px-4">
       <div className="flex items-center gap-3 pl-1">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-sm font-semibold text-white shadow-[0_14px_30px_-18px_rgba(37,99,235,0.9)]">
+        <div className="app-solid-primary flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-semibold">
           CF
         </div>
         <div className="space-y-0.5">
@@ -61,7 +61,7 @@ export default function TitleBar() {
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9 rounded-xl border-white/60 bg-white/60 focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/5"
+          className="app-soft-button h-9 w-9 rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0"
           onClick={toggleLanguage}
         >
           <Languages className="h-4 w-4" />
@@ -70,7 +70,7 @@ export default function TitleBar() {
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9 rounded-xl border-white/60 bg-white/60 focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/5"
+          className="app-soft-button h-9 w-9 rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0"
           onClick={toggleTheme}
         >
           {mounted && resolvedTheme === 'dark' ? (
@@ -94,9 +94,9 @@ export default function TitleBar() {
         </button>
         <button
           onClick={handleClose}
-          className="group flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-red-500 hover:text-white"
+          className="group flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground"
         >
-          <X className="h-4 w-4 group-hover:text-white" />
+          <X className="h-4 w-4 group-hover:text-destructive-foreground" />
         </button>
       </div>
     </div>

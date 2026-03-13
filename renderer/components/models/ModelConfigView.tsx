@@ -910,8 +910,8 @@ export default function ModelConfigView() {
                             className={cn(
                               'rounded-[22px] border px-4 py-4 text-left transition',
                               active
-                                ? 'border-slate-300 bg-slate-100 text-slate-900 dark:border-white/15 dark:bg-white/8 dark:text-white'
-                                : 'border-border/80 bg-card/90 text-foreground hover:border-slate-300 dark:hover:border-white/20',
+                                ? 'app-selection-card-active'
+                                : 'app-selection-card',
                             )}
                             onClick={() => {
                               setRoute((prev) => ({
@@ -926,7 +926,7 @@ export default function ModelConfigView() {
                               <div className="font-medium">{modelId}</div>
                               {active ? <Check className="h-4 w-4" /> : null}
                             </div>
-                            <div className={cn('mt-2 text-xs', active ? 'text-slate-600 dark:text-white/65' : 'text-muted-foreground')}>
+                            <div className={cn('mt-2 text-xs', active ? 'text-foreground/70' : 'text-muted-foreground')}>
                               {t('models.primarySelectHint')}
                             </div>
                           </button>
@@ -958,9 +958,9 @@ export default function ModelConfigView() {
                               'rounded-full border px-3 py-2 text-sm transition',
                               disabled
                                 ? 'cursor-not-allowed border-border/60 bg-muted/20 text-muted-foreground opacity-60'
-                                : active
-                                  ? 'border-slate-300 bg-slate-100 text-slate-900 dark:border-white/15 dark:bg-white/8 dark:text-white'
-                                  : 'border-border/80 bg-card/90 text-foreground hover:border-slate-300 dark:hover:border-white/20',
+                              : active
+                                  ? 'app-selection-chip-active'
+                                  : 'app-selection-chip',
                             )}
                             onClick={() => {
                               setRoute((prev) => ({

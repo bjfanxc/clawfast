@@ -550,7 +550,7 @@ const en = {
       providerModelsRequired: 'Provider "{{id}}" must include at least one model ID.',
     },
     previewTitle: 'Config Preview',
-    previewHint: 'Read-only view of the current config text (JSON5 style)',
+    previewHint: 'Read-only view of the current config text',
     previewCopy: 'Copy',
     previewCopied: 'Config copied',
     previewCopyFailed: 'Failed to copy config',

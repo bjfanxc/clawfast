@@ -20,10 +20,10 @@ export default function WelcomeScreen() {
     <div className="flex h-full flex-col items-center justify-center gap-8 p-8 text-center">
       <div className="flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-blue-600 text-primary-foreground shadow-[0_22px_50px_-28px_rgba(37,99,235,1)]">
+          <div className="app-solid-primary flex h-20 w-20 items-center justify-center rounded-[28px]">
             <MessageSquare className="h-8 w-8" />
           </div>
-          <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-muted-foreground dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
+          <div className="inline-flex items-center rounded-full border border-border/80 bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="mr-2 h-3.5 w-3.5" />
             {t('welcome.badge')}
           </div>
