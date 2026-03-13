@@ -23,10 +23,13 @@ extraResources:
 publish: null
 win:
   target: nsis
-  icon: resources/favicon.ico
+  icon: favicon.ico
   legalTrademarks: ""
   signAndEditExecutable: false
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   packElevateHelper: false
+  installerIcon: favicon.ico
+  uninstallerIcon: favicon.ico
+  installerHeaderIcon: favicon.ico

@@ -2,7 +2,7 @@
 
 > A productized desktop admin console for OpenClaw, built for long-term operations.
 >
-> 面向长期运维的 OpenClaw 桌面管理端。
+> 面向长期运维的 OpenClaw 桌面管理控制台。
 
 ## Overview | 项目简介
 
@@ -14,6 +14,59 @@ Current integration target | 当前集成版本:
 
 - `openclaw@2026.3.2`
 
+## Screenshots | 界面截图
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./resources/screenshot/dashboard.png" alt="Dashboard" width="100%" />
+      <br />
+      <strong>Dashboard</strong>
+    </td>
+    <td align="center">
+      <img src="./resources/screenshot/chat.png" alt="Chat" width="100%" />
+      <br />
+      <strong>Chat</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./resources/screenshot/channel.png" alt="Channels" width="100%" />
+      <br />
+      <strong>Channels</strong>
+    </td>
+    <td align="center">
+      <img src="./resources/screenshot/model.png" alt="Models" width="100%" />
+      <br />
+      <strong>Models</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./resources/screenshot/cron.png" alt="Scheduled Tasks" width="100%" />
+      <br />
+      <strong>Scheduled Tasks</strong>
+    </td>
+    <td align="center">
+      <img src="./resources/screenshot/session.png" alt="Sessions" width="100%" />
+      <br />
+      <strong>Sessions</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./resources/screenshot/skills.png" alt="Skills" width="100%" />
+      <br />
+      <strong>Skills</strong>
+    </td>
+    <td align="center">
+      <img src="./resources/screenshot/usage.png" alt="Usage" width="100%" />
+      <br />
+      <strong>Usage</strong>
+    </td>
+  </tr>
+</table>
+
 ## Highlights | 核心能力
 
 - Two packaging modes: bundled OpenClaw and `admin-only`
@@ -24,9 +77,9 @@ Current integration target | 当前集成版本:
 - Chinese and English localization foundation
 
 - 双打包模式：内置 OpenClaw 与 `admin-only`
-- Gateway 断连降级：页面可继续访问，顶部 warning，可重新检测
+- Gateway 断连降级：页面可继续访问，顶部告警并支持重试
 - 模型配置已重构为“模型供应商 + 模型路由”
-- 定时任务改为弹层创建，支持普通创建与高阶创建
+- 定时任务基于弹出层创建，支持普通创建与高级创建
 - 支持亮色 / 暗色桌面界面
 - 具备中英文基础能力
 
@@ -110,8 +163,6 @@ Gateway 状态由本地 IPC 提供，而不是直接走 OpenClaw RPC。
 
 The model page is organized around:
 
-模型页目前拆分为：
-
 - model providers | 模型供应商
 - model routing | 模型路由
 
@@ -123,7 +174,7 @@ Current provider flow supports viewing configured providers, adding a provider i
 
 The scheduled task page is aligned with the current OpenClaw cron job structure.
 
-定时任务页已按当前 OpenClaw cron job 结构进行重构。
+定时任务页面已按当前 OpenClaw cron job 结构进行重构。
 
 Current behavior includes:
 
@@ -135,7 +186,7 @@ Current behavior includes:
 当前已支持：
 
 - 使用弹层创建任务，不再占用主内容区
-- 普通创建与高阶创建两种模式
+- 普通创建与高级创建两种模式
 - `schedule`、`payload`、`sessionTarget`、`wakeMode`、`delivery` 等字段联动
 - `announce`、`webhook` 和一次性任务相关校验
 
@@ -146,7 +197,7 @@ main/       Electron main process, gateway integration, IPC
 renderer/   Desktop UI built with Next.js + React
 shared/     Shared types and contracts between main and renderer
 scripts/    Build, packaging, OpenClaw bundling, Node runtime bundling
-resources/  Icons and packaging resources
+resources/  Icons, screenshots, and packaging resources
 ```
 
 ## Useful Scripts | 常用脚本
@@ -171,14 +222,21 @@ npm run prune:openclaw
 
 Before publishing a release:
 
-发布前建议至少确认以下内容：
-
 - packaged app connects to the expected gateway target
 - bundled OpenClaw mode starts the bundled gateway correctly
 - `admin-only` mode does not auto-start OpenClaw
 - model provider configuration saves and loads correctly
 - scheduled tasks can be created, edited, disabled, and deleted correctly
 - packaged icons and Windows taskbar identity are correct
+
+发布前建议至少确认以下内容：
+
+- 打包后的应用连接到预期的 gateway
+- 内置 OpenClaw 模式能正确启动 bundled gateway
+- `admin-only` 模式不会自动启动 OpenClaw
+- 模型供应商配置可正确保存和加载
+- 定时任务可正常创建、编辑、禁用和删除
+- 打包图标和 Windows 任务栏身份显示正确
 
 ## Roadmap | 后续计划
 
@@ -190,9 +248,9 @@ Before publishing a release:
 
 - 继续完善模型供应商配置体验
 - 优化模型路由选择交互
-- 继续打磨定时任务高级配置与校验
-- 进一步统一桌面端页面视觉规范
-- 提升打包、文档和发布完成度
+- 持续打磨定时任务高级配置与校验
+- 进一步统一桌面端页面视觉语言
+- 提升打包、文档和发布完善度
 
 ## License | 许可证
 
