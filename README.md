@@ -16,56 +16,37 @@ Current integration target | 当前集成版本:
 
 ## Screenshots | 界面截图
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="./resources/screenshot/dashboard.png" alt="Dashboard" width="100%" />
-      <br />
-      <strong>Dashboard</strong>
-    </td>
-    <td align="center">
-      <img src="./resources/screenshot/chat.png" alt="Chat" width="100%" />
-      <br />
-      <strong>Chat</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="./resources/screenshot/channel.png" alt="Channels" width="100%" />
-      <br />
-      <strong>Channels</strong>
-    </td>
-    <td align="center">
-      <img src="./resources/screenshot/model.png" alt="Models" width="100%" />
-      <br />
-      <strong>Models</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="./resources/screenshot/cron.png" alt="Scheduled Tasks" width="100%" />
-      <br />
-      <strong>Scheduled Tasks</strong>
-    </td>
-    <td align="center">
-      <img src="./resources/screenshot/session.png" alt="Sessions" width="100%" />
-      <br />
-      <strong>Sessions</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="./resources/screenshot/skills.png" alt="Skills" width="100%" />
-      <br />
-      <strong>Skills</strong>
-    </td>
-    <td align="center">
-      <img src="./resources/screenshot/usage.png" alt="Usage" width="100%" />
-      <br />
-      <strong>Usage</strong>
-    </td>
-  </tr>
-</table>
+### Dashboard
+
+![Dashboard](./resources/screenshot/dashboard.png)
+
+### Chat
+
+![Chat](./resources/screenshot/chat.png)
+
+### Channels
+
+![Channels](./resources/screenshot/channel.png)
+
+### Models
+
+![Models](./resources/screenshot/model.png)
+
+### Scheduled Tasks
+
+![Scheduled Tasks](./resources/screenshot/cron.png)
+
+### Sessions
+
+![Sessions](./resources/screenshot/session.png)
+
+### Skills
+
+![Skills](./resources/screenshot/skills.png)
+
+### Usage
+
+![Usage](./resources/screenshot/usage.png)
 
 ## Highlights | 核心能力
 
