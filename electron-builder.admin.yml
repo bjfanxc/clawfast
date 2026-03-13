@@ -1,0 +1,22 @@
+appId: com.clawfast.app
+productName: ClawFast
+copyright: Copyright 2024
+directories:
+  output: dist
+  buildResources: resources
+afterPack: scripts/after-pack.cjs
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null
+win:
+  target: nsis
+  icon: resources/clawfast.png
+  legalTrademarks: ""
+  signAndEditExecutable: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  packElevateHelper: false

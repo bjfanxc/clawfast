@@ -1,0 +1,32 @@
+appId: com.clawfast.app
+productName: ClawFast
+copyright: Copyright 2024
+directories:
+  output: dist
+  buildResources: resources
+afterPack: scripts/after-pack.cjs
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+extraResources:
+  - from: build/node-runtime
+    to: node-runtime
+    filter:
+      - '**/*'
+  - from: build/openclaw
+    to: openclaw
+    filter:
+      - '**/*'
+      - '!node_modules{,/**}'
+publish: null
+win:
+  target: nsis
+  icon: resources/clawfast.png
+  legalTrademarks: ""
+  signAndEditExecutable: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  packElevateHelper: false
