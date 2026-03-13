@@ -32,7 +32,7 @@
 </p>
 
 <p align="center">
-  English | 简体中文
+  English | <a href="README.zh-CN.md">简体中文</a>
 </p>
 
 ---
@@ -43,7 +43,7 @@
 
 Instead of pushing everything through config files and terminal-first flows, ClawFast brings the most common OpenClaw management tasks into a focused desktop interface that is easier to operate, easier to verify, and easier to hand over across teams.
 
-当前集成版本：
+Current integration target:
 
 - `openclaw@2026.3.2`
 
