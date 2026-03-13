@@ -326,11 +326,11 @@ function deriveChannelCard(
 function getChannelStatusTone(status: DerivedChannelCard['status']) {
   switch (status) {
     case 'running':
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
+      return 'border border-emerald-200/80 bg-emerald-50/80 text-emerald-700 dark:border-emerald-400/22 dark:bg-emerald-950/35 dark:text-emerald-200'
     case 'configured':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200'
+      return 'border border-primary/18 bg-primary/10 text-foreground dark:border-primary/25 dark:bg-primary/18 dark:text-primary-foreground'
     default:
-      return 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-100'
+      return 'border border-border/80 bg-muted/70 text-muted-foreground dark:bg-muted/40 dark:text-muted-foreground'
   }
 }
 
@@ -375,7 +375,7 @@ function ChannelIcon({ channelId }: { channelId: string }) {
 
   if (iconAsset) {
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card/95 shadow-[0_18px_35px_-28px_rgba(37,99,235,0.35)]">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card/95 shadow-[0_18px_35px_-30px_rgba(191,73,36,0.18)]">
         <Image src={iconAsset} alt={channelId} width={28} height={28} className="h-7 w-7 object-contain" />
       </div>
     )
@@ -383,14 +383,14 @@ function ChannelIcon({ channelId }: { channelId: string }) {
 
   if (Icon) {
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 dark:bg-blue-950/30 dark:text-blue-200 dark:ring-blue-900/60">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
         <Icon className="h-7 w-7" />
       </div>
     )
   }
 
   return (
-    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700">
+    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-muted/55 text-muted-foreground">
       <Bot className="h-6 w-6" />
     </div>
   )
@@ -1148,9 +1148,9 @@ export default function ChannelsView() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card className="rounded-[28px] border-blue-100/80 shadow-sm dark:border-blue-950/50">
+          <Card className="rounded-[28px] border-border/80 bg-card/96 shadow-sm">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-200">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
                 <Radio className="h-7 w-7" />
               </div>
               <div>
@@ -1160,9 +1160,9 @@ export default function ChannelsView() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[28px] border-emerald-100/80 shadow-sm dark:border-emerald-950/50">
+          <Card className="rounded-[28px] border-border/80 bg-card/96 shadow-sm">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary">
                 <Power className="h-7 w-7" />
               </div>
               <div>
@@ -1172,9 +1172,9 @@ export default function ChannelsView() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[28px] border-blue-100/80 shadow-sm dark:border-blue-950/50">
+          <Card className="rounded-[28px] border-border/80 bg-card/96 shadow-sm">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-200">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-200/80 bg-emerald-50/80 text-emerald-600 dark:border-emerald-400/24 dark:bg-emerald-950/35 dark:text-emerald-300">
                 <Unplug className="h-7 w-7" />
               </div>
               <div>
@@ -1212,7 +1212,7 @@ export default function ChannelsView() {
             {!loading && visibleChannelCards.length > 0 ? (
               <div className="space-y-3">
                 {visibleChannelCards.map((channel) => (
-                  <Card key={channel.id} className="rounded-[24px] border-blue-100/70 bg-card/95 shadow-sm dark:border-blue-950/40">
+                  <Card key={channel.id} className="rounded-[24px] border-border/80 bg-card/95 shadow-sm">
                     <CardContent className="p-5">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="flex min-w-0 items-start gap-4">
@@ -1269,7 +1269,7 @@ export default function ChannelsView() {
                               ) : null}
                             </div>
                             {channel.lastError ? (
-                              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+                              <div className="rounded-2xl border border-destructive/18 bg-destructive/10 px-3 py-2 text-xs text-foreground dark:border-destructive/30 dark:bg-destructive/18 dark:text-destructive-foreground">
                                 {channel.lastError}
                               </div>
                             ) : null}

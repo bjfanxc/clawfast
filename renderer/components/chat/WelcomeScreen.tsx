@@ -36,15 +36,15 @@ export default function WelcomeScreen() {
         </div>
 
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2">
-          <Card className="rounded-[28px] border-border/80 bg-card p-7 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <MessageSquare className="mb-3 h-5 w-5 text-muted-foreground" />
+          <Card className="rounded-[28px] border-border/80 bg-card p-7 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/16 hover:bg-primary/[0.03] hover:shadow-md">
+            <MessageSquare className="mb-3 h-5 w-5 text-primary" />
             <h3 className="font-semibold">{t('welcome.askQuestion.title')}</h3>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {t('welcome.askQuestion.description')}
             </p>
           </Card>
-          <Card className="rounded-[28px] border-border/80 bg-card p-7 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <Sparkles className="mb-3 h-5 w-5 text-muted-foreground" />
+          <Card className="rounded-[28px] border-border/80 bg-card p-7 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/16 hover:bg-primary/[0.03] hover:shadow-md">
+            <Sparkles className="mb-3 h-5 w-5 text-primary" />
             <h3 className="font-semibold">{t('welcome.creativeTask.title')}</h3>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {t('welcome.creativeTask.description')}

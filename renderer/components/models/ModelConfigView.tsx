@@ -456,7 +456,7 @@ function DropdownField({
       <button
         type="button"
         disabled={disabled}
-        className="flex h-11 w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 text-left text-sm text-foreground transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-slate-950/65 dark:hover:border-white/20"
+        className="flex h-11 w-full items-center justify-between rounded-2xl border border-input bg-background px-3 text-left text-sm text-foreground transition hover:border-ring/40 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-muted/35"
         onClick={() => setOpen((current) => !current)}
       >
         <span className={cn('truncate', !selected && 'text-muted-foreground')}>{selected?.label ?? placeholder}</span>
@@ -505,7 +505,7 @@ function ProviderIcon({ type, className }: { type: ModelProviderType; className?
 
   return (
     <div
-      className={cn('flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/70', className)}
+      className={cn('flex h-11 w-11 items-center justify-center rounded-2xl border border-border/80 bg-card shadow-sm dark:bg-muted/35', className)}
       style={{ boxShadow: `0 12px 28px -20px ${template.tint}` }}
     >
       <img src={template.iconSrc} alt={template.label} className="h-6 w-6 object-contain" />
@@ -1015,7 +1015,7 @@ export default function ModelConfigView() {
                     <button
                       key={template.type}
                       type="button"
-                      className="rounded-[24px] border border-border/80 bg-card/95 p-5 text-left shadow-sm transition hover:border-slate-300 dark:hover:border-white/20"
+                      className="rounded-[24px] border border-border/80 bg-card/95 p-5 text-left shadow-sm transition hover:border-primary/20 hover:bg-primary/[0.03] dark:hover:border-primary/20 dark:hover:bg-primary/[0.04]"
                       onClick={() =>
                         setProviderEditor({
                           open: true,
@@ -1063,7 +1063,7 @@ export default function ModelConfigView() {
                           }))
                         }
                         placeholder={t('models.providerIdPlaceholder')}
-                        className="h-11 rounded-2xl border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-950/65"
+                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
                       />
                       <FieldError error={providerEditor.errors.id} />
                     </div>
@@ -1081,7 +1081,7 @@ export default function ModelConfigView() {
                             }))
                           }
                           placeholder={editorTemplate?.defaultApi || 'openai-completions'}
-                          className="h-11 rounded-2xl border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-950/65"
+                          className="h-11 rounded-2xl border-border/80 bg-muted/35"
                         />
                         <FieldError error={providerEditor.errors.api} />
                       </div>
@@ -1101,7 +1101,7 @@ export default function ModelConfigView() {
                           }))
                         }
                         placeholder={editorTemplate?.defaultBaseUrl || t('models.providerBaseUrlPlaceholder')}
-                        className="h-11 rounded-2xl border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-950/65"
+                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
                       />
                       <FieldError error={providerEditor.errors.baseUrl} />
                     </div>
@@ -1118,7 +1118,7 @@ export default function ModelConfigView() {
                           }))
                         }
                         placeholder={editorTemplate?.apiKeyPlaceholder || t('models.providerApiKeyPlaceholder')}
-                        className="h-11 rounded-2xl border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-950/65"
+                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
                       />
                       <FieldError error={providerEditor.errors.apiKey} />
                     </div>
@@ -1136,7 +1136,7 @@ export default function ModelConfigView() {
                         }))
                       }
                       placeholder={editorTemplate?.modelPlaceholder || t('models.providerModelsPlaceholder')}
-                      className="min-h-[148px] resize-none rounded-2xl border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-950/65"
+                      className="min-h-[148px] resize-none rounded-2xl border-border/80 bg-muted/35"
                     />
                     <div className="text-xs text-muted-foreground">{t('models.providerModelsHelp')}</div>
                     <FieldError error={providerEditor.errors.models} />

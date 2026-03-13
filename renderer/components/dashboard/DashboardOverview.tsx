@@ -164,7 +164,7 @@ function SnapshotStat({
         className={cn(
           'mt-3 text-2xl font-semibold',
           tone === 'success' && 'text-emerald-600 dark:text-emerald-300',
-          tone === 'warn' && 'text-amber-600 dark:text-amber-300'
+          tone === 'warn' && 'text-primary dark:text-primary'
         )}
       >
         {value}
@@ -185,10 +185,10 @@ function StatCard({
   hint: string
 }) {
   return (
-    <Card className="min-w-0 rounded-[28px] border-blue-100/80 bg-card/95 shadow-sm dark:border-blue-950/50">
+    <Card className="min-w-0 rounded-[28px] border-border/80 bg-card/95 shadow-sm">
       <CardContent className="p-6">
         <div className="flex min-w-0 items-center gap-4">
-          <div className="shrink-0 rounded-2xl bg-blue-50 p-3 text-blue-600 dark:bg-blue-950/30 dark:text-blue-200">
+          <div className="shrink-0 rounded-2xl border border-primary/16 bg-primary/10 p-3 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
             {icon}
           </div>
           <div className="min-w-0 text-sm font-semibold text-muted-foreground">{label}</div>
@@ -274,7 +274,7 @@ export default function DashboardOverview({ refreshSignal = 0 }: { refreshSignal
           </CardHeader>
           <CardContent className="space-y-5">
             {showAdminOnlyGatewayHint ? (
-              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+              <div className="flex items-start gap-3 rounded-2xl border border-primary/16 bg-primary/10 px-4 py-3 text-sm text-foreground dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <div>{t('dashboard.access.adminOnlyGatewayHint')}</div>
               </div>

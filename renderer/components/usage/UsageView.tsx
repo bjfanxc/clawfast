@@ -249,7 +249,7 @@ function SummaryCard({ icon: Icon, title, value, hint }: { icon: React.Component
     <Card className="app-subpanel rounded-[28px] shadow-none">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-200"><Icon className="h-5 w-5" /></div>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground"><Icon className="h-5 w-5" /></div>
           <div className="min-w-0">
             <div className="text-sm font-semibold text-muted-foreground">{title}</div>
             <div className="mt-2 break-words text-3xl font-black tracking-tight text-foreground">{value}</div>
@@ -292,10 +292,10 @@ function DailyChart({ daily, chartMode }: { daily: CostUsageDailyEntry[]; chartM
         const height = Math.max(12, Math.round((total / maxValue) * 160))
         const segments = chartMode === 'byType'
           ? [
-              { value: item.output, color: 'bg-rose-500' },
-              { value: item.input, color: 'bg-amber-500' },
-              { value: item.cacheWrite, color: 'bg-emerald-500' },
-              { value: item.cacheRead, color: 'bg-cyan-500' },
+              { value: item.output, color: 'bg-primary' },
+              { value: item.input, color: 'bg-primary/80' },
+              { value: item.cacheWrite, color: 'bg-primary/60' },
+              { value: item.cacheRead, color: 'bg-primary/40' },
             ]
           : []
         const segmentTotal = segments.reduce((sum, part) => sum + part.value, 0) || 1
@@ -304,13 +304,13 @@ function DailyChart({ daily, chartMode }: { daily: CostUsageDailyEntry[]; chartM
           <div key={item.date} className="flex min-w-[56px] flex-col items-center gap-2">
             <div className="text-[11px] font-medium text-muted-foreground">{formatCompact(item.totalTokens)}</div>
             {chartMode === 'byType' ? (
-              <div className="flex w-full flex-col justify-end overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-900" style={{ height: `${height}px` }} title={`${item.date}\n${formatTokens(item.totalTokens)}`}>
+               <div className="flex w-full flex-col justify-end overflow-hidden rounded-t-2xl bg-muted/70 dark:bg-muted/35" style={{ height: `${height}px` }} title={`${item.date}\n${formatTokens(item.totalTokens)}`}>
                 {segments.map((segment, index) => (
                   <div key={`${item.date}-${index}`} className={segment.color} style={{ height: `${Math.max((segment.value / segmentTotal) * 100, segment.value > 0 ? 2 : 0)}%` }} />
                 ))}
               </div>
             ) : (
-              <div className="w-full rounded-t-2xl bg-blue-500/80 dark:bg-blue-400/75" style={{ height: `${height}px` }} title={`${item.date}\n${formatTokens(item.totalTokens)}`} />
+               <div className="w-full rounded-t-2xl bg-primary/80 dark:bg-primary/70" style={{ height: `${height}px` }} title={`${item.date}\n${formatTokens(item.totalTokens)}`} />
             )}
             <div className="text-[11px] text-muted-foreground">{item.date.slice(5)}</div>
           </div>
@@ -323,16 +323,16 @@ function DailyChart({ daily, chartMode }: { daily: CostUsageDailyEntry[]; chartM
 function BreakdownBar({ totals }: { totals: ReturnType<typeof buildUsageTotals> }) {
   const total = Math.max(totals.totalTokens, 1)
   const items = [
-    { label: `Output ${formatCompact(totals.output)}`, value: totals.output, color: 'bg-rose-500' },
-    { label: `Input ${formatCompact(totals.input)}`, value: totals.input, color: 'bg-amber-500' },
-    { label: `Cache Write ${formatCompact(totals.cacheWrite)}`, value: totals.cacheWrite, color: 'bg-emerald-500' },
-    { label: `Cache Read ${formatCompact(totals.cacheRead)}`, value: totals.cacheRead, color: 'bg-cyan-500' },
+    { label: `Output ${formatCompact(totals.output)}`, value: totals.output, color: 'bg-primary' },
+    { label: `Input ${formatCompact(totals.input)}`, value: totals.input, color: 'bg-primary/80' },
+    { label: `Cache Write ${formatCompact(totals.cacheWrite)}`, value: totals.cacheWrite, color: 'bg-primary/60' },
+    { label: `Cache Read ${formatCompact(totals.cacheRead)}`, value: totals.cacheRead, color: 'bg-primary/40' },
   ]
 
   return (
-    <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/65">
+    <div className="space-y-3 rounded-[24px] border border-border/80 bg-muted/35 p-4">
       <div className="text-base font-bold text-foreground">Tokens by Type</div>
-      <div className="flex h-7 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-900">
+      <div className="flex h-7 overflow-hidden rounded-full bg-muted/80 dark:bg-muted/40">
         {items.map((item) => <div key={item.label} className={item.color} style={{ width: `${Math.max((item.value / total) * 100, item.value > 0 ? 1 : 0)}%` }} title={item.label} />)}
       </div>
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
@@ -356,13 +356,13 @@ function ActivityPanel({ sessions, t }: { sessions: UsageSessionEntry[]; t: Retu
         </div>
       </CardHeader>
       <CardContent className="grid gap-5 lg:grid-cols-[380px_minmax(0,1fr)]">
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/65">
+        <div className="rounded-[24px] border border-border/80 bg-muted/35 p-4">
           <div className="mb-4 text-sm font-semibold text-foreground">{t('usage.activityWeekdays')}</div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-3">
             {WEEKDAYS.map((label, index) => <div key={label} className="rounded-2xl border border-rose-200 px-4 py-3 dark:border-rose-500/20" style={{ backgroundColor: `rgba(244, 63, 94, ${stats.weekdayTotals[index] > 0 ? 0.12 + (stats.weekdayTotals[index] / maxDay) * 0.6 : 0.04})` }}><div className="text-sm font-semibold text-foreground">{label}</div><div className="mt-2 text-lg text-foreground">{formatCompact(stats.weekdayTotals[index])}</div></div>)}
           </div>
         </div>
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/65">
+        <div className="rounded-[24px] border border-border/80 bg-muted/35 p-4">
           <div className="mb-4 flex items-center justify-between gap-3"><div className="text-sm font-semibold text-foreground">{t('usage.activityHours')}</div><div className="text-xs text-muted-foreground">0 - 23</div></div>
           <div className="grid grid-cols-6 gap-2 sm:grid-cols-8 xl:grid-cols-12">
             {stats.hourTotals.map((value, hour) => <div key={hour} className="space-y-2"><div className="h-8 rounded-xl border border-rose-200 dark:border-rose-500/20" style={{ backgroundColor: `rgba(244, 63, 94, ${value > 0 ? 0.08 + (value / maxHour) * 0.75 : 0.04})` }} title={`${hour}:00 - ${formatCompact(value)} tokens`} /><div className="text-center text-[11px] text-muted-foreground">{hour}</div></div>)}
@@ -474,8 +474,8 @@ export default function UsageView() {
                 <CardTitle className="text-2xl font-black">{t('usage.overviewTitle')}</CardTitle>
                 <div className="flex items-center gap-2">
                   <div className="inline-flex rounded-2xl border border-border/80 bg-muted/40 p-1">
-                    <button type="button" className={cn('rounded-xl px-3 py-1.5 text-xs font-medium', dailyChartMode === 'total' ? 'bg-rose-500 text-white' : 'text-muted-foreground')} onClick={() => setDailyChartMode('total')}>{t('usage.chartModes.total')}</button>
-                    <button type="button" className={cn('rounded-xl px-3 py-1.5 text-xs font-medium', dailyChartMode === 'byType' ? 'bg-rose-500 text-white' : 'text-muted-foreground')} onClick={() => setDailyChartMode('byType')}>{t('usage.chartModes.byType')}</button>
+                     <button type="button" className={cn('rounded-xl px-3 py-1.5 text-xs font-medium', dailyChartMode === 'total' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')} onClick={() => setDailyChartMode('total')}>{t('usage.chartModes.total')}</button>
+                     <button type="button" className={cn('rounded-xl px-3 py-1.5 text-xs font-medium', dailyChartMode === 'byType' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')} onClick={() => setDailyChartMode('byType')}>{t('usage.chartModes.byType')}</button>
                   </div>
                 </div>
               </div>
@@ -496,17 +496,17 @@ export default function UsageView() {
               {loading ? (
                 <div className="flex h-40 items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('usage.loading')}</div>
               ) : sessions.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10">{t('usage.empty')}</div>
+                 <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">{t('usage.empty')}</div>
               ) : (
                 <ScrollArea className="h-[520px] pr-3">
-                  <div className="mb-4 flex flex-wrap gap-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-200">
+                   <div className="mb-4 flex flex-wrap gap-4 rounded-[24px] border border-border/80 bg-muted/35 p-4 text-sm text-foreground">
                     <div>{formatCompact(stats.avgTokens)} avg</div>
                     <div>{stats.errors} errors</div>
                     <div>{formatCompact(stats.throughput)} tok/min</div>
                   </div>
                   <div className="flex flex-col gap-2">
                     {sessions.map((session) => (
-                      <button key={session.key} type="button" className={cn('rounded-2xl border px-4 py-4 text-left transition', selectedSessionKey === session.key ? 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-100' : 'border-slate-200 bg-white/80 text-slate-700 hover:border-blue-100 hover:bg-blue-50/50 dark:border-white/10 dark:bg-slate-950/55 dark:text-slate-200 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/10')} onClick={() => setSelectedSessionKey(session.key)}>
+                      <button key={session.key} type="button" className={cn('rounded-2xl border px-4 py-4 text-left transition', selectedSessionKey === session.key ? 'border-primary/18 bg-primary/10 text-foreground dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground' : 'border-border/80 bg-card/80 text-foreground hover:border-primary/14 hover:bg-primary/[0.04] dark:bg-card/65 dark:hover:border-primary/20 dark:hover:bg-primary/[0.08]')} onClick={() => setSelectedSessionKey(session.key)}>
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1">
                             <div className="break-words text-sm font-semibold leading-6">{getSessionTitle(session)}</div>
@@ -540,7 +540,7 @@ export default function UsageView() {
           </CardHeader>
           <CardContent className="space-y-5">
             {!selectedSession ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10">{t('usage.detailEmpty')}</div>
+               <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">{t('usage.detailEmpty')}</div>
             ) : (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-4">
@@ -555,7 +555,7 @@ export default function UsageView() {
                   <SummaryCard icon={CalendarRange} title={t('usage.sessionRow.duration')} value={formatDuration(selectedSession.usage?.durationMs ?? 0)} hint={`${selectedSession.usage?.firstActivity ? new Date(selectedSession.usage.firstActivity).toLocaleString() : '-'} - ${selectedSession.usage?.lastActivity ? new Date(selectedSession.usage.lastActivity).toLocaleString() : '-'}`} />
                 </div>
 
-                <div className="grid gap-3 rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-200 sm:grid-cols-2 xl:grid-cols-4">
+                 <div className="grid gap-3 rounded-[24px] border border-border/80 bg-muted/35 p-4 text-sm text-foreground sm:grid-cols-2 xl:grid-cols-4">
                   <div><div className="text-xs text-muted-foreground">{t('usage.detail.channel')}</div><div className="mt-1 font-medium">{selectedSession.channel || '-'}</div></div>
                   <div><div className="text-xs text-muted-foreground">{t('usage.detail.model')}</div><div className="mt-1 break-words font-medium">{selectedSession.model || '-'}</div></div>
                   <div><div className="text-xs text-muted-foreground">{t('usage.detail.provider')}</div><div className="mt-1 break-words font-medium">{selectedSession.modelProvider || selectedSession.providerOverride || '-'}</div></div>
@@ -568,15 +568,15 @@ export default function UsageView() {
                 </div>
 
                 <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-                  <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/65">
+                   <div className="rounded-[24px] border border-border/80 bg-muted/35 p-4">
                     <div className="mb-3 text-sm font-semibold text-foreground">{t('usage.detail.logs')}</div>
                     {detailLoading ? <div className="flex h-40 items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('usage.loading')}</div> : logs.length ? (
                       <ScrollArea className="h-[360px] pr-3">
                         <div className="space-y-3">
                           {logs.map((log, index) => (
-                            <div key={`${log.timestamp}-${index}`} className="rounded-2xl border border-slate-200 bg-white/75 px-4 py-3 text-sm dark:border-white/10 dark:bg-slate-900/55">
+                             <div key={`${log.timestamp}-${index}`} className="rounded-2xl border border-border/80 bg-card/82 px-4 py-3 text-sm">
                               <div className="flex items-center justify-between gap-3"><div className="font-medium text-foreground">{getLogRoleLabel(log.role, t)}</div><div className="text-xs text-muted-foreground">{formatRelativeTime(log.timestamp)}</div></div>
-                              <div className="mt-2 whitespace-pre-wrap break-words leading-7 text-slate-700 dark:text-slate-200">{log.content}</div>
+                               <div className="mt-2 whitespace-pre-wrap break-words leading-7 text-foreground">{log.content}</div>
                             </div>
                           ))}
                         </div>
@@ -584,7 +584,7 @@ export default function UsageView() {
                     ) : <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">{t('usage.noLogs')}</div>}
                   </div>
 
-                  <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/65">
+                   <div className="rounded-[24px] border border-border/80 bg-muted/35 p-4">
                     <div className="mb-3 text-sm font-semibold text-foreground">{t('usage.detail.summary')}</div>
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center justify-between gap-4"><span className="text-muted-foreground">{t('usage.breakdown.input')}</span><span className="font-medium">{formatTokens(selectedSession.usage?.input ?? 0)}</span></div>

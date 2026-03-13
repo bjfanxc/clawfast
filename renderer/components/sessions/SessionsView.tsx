@@ -238,7 +238,7 @@ export default function SessionsView() {
                   {t('sessions.refresh')}
                 </div>
               ) : sessions.length === 0 ? (
-                <div className="flex h-full min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10 dark:bg-slate-950/30">
+                <div className="flex h-full min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
                   {t('sessions.empty')}
                 </div>
               ) : (
@@ -250,8 +250,8 @@ export default function SessionsView() {
                         type="button"
                         className={`w-full rounded-2xl border px-3 py-3 text-left text-sm transition ${
                           selectedKey === session.key
-                            ? 'border-slate-300 bg-slate-100 text-foreground dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100'
-                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-950/55 dark:text-slate-200 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
+                            ? 'border-primary/18 bg-primary/10 text-foreground dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground'
+                            : 'border-border/80 bg-card/80 text-foreground hover:border-primary/14 hover:bg-primary/[0.04] dark:bg-card/65 dark:hover:border-primary/20 dark:hover:bg-primary/[0.08]'
                         }`}
                         onClick={() => setSelectedKey(session.key)}
                       >
@@ -278,7 +278,7 @@ export default function SessionsView() {
                         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           {t('sessions.sessionKey')}
                         </div>
-                        <div className="break-all rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm text-slate-700 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-200">
+                        <div className="break-all rounded-2xl border border-border/80 bg-muted/35 px-4 py-3 font-mono text-sm text-foreground">
                           {selectedSession.key}
                         </div>
                       </div>
@@ -291,7 +291,7 @@ export default function SessionsView() {
                             value={labelDraft}
                             onChange={(event) => setLabelDraft(event.target.value)}
                             placeholder={selectedSession.label || ''}
-                            className="h-11 flex-1 rounded-2xl border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-100 dark:placeholder:text-slate-500"
+                            className="h-11 flex-1 rounded-2xl border-border/80 bg-card/82"
                           />
                           <Button
                             className="h-11 shrink-0 rounded-2xl px-4"
@@ -303,7 +303,7 @@ export default function SessionsView() {
                           </Button>
                           <Button
                             variant="outline"
-                            className="h-11 shrink-0 rounded-2xl px-4 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/40 dark:bg-slate-950/55 dark:text-red-300 dark:hover:bg-red-950/35 dark:hover:text-red-200"
+                            className="h-11 shrink-0 rounded-2xl px-4 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => setDeleteTarget(selectedSession)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -313,7 +313,7 @@ export default function SessionsView() {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-200 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-3 rounded-[24px] border border-border/80 bg-muted/35 p-4 text-sm text-foreground sm:grid-cols-2 xl:grid-cols-3">
                         <div>
                           <div className="text-xs text-muted-foreground">{t('sessions.displayName')}</div>
                           <div className="mt-1 font-medium">{renderValue(selectedSession.displayName || selectedSession.origin?.label)}</div>
@@ -361,7 +361,7 @@ export default function SessionsView() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10 dark:bg-slate-950/30">
+                  <div className="flex min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
                     {t('sessions.empty')}
                   </div>
                 )}
@@ -377,7 +377,7 @@ export default function SessionsView() {
           </CardHeader>
           <CardContent className="pb-6">
             {!selectedSession ? (
-              <div className="flex min-h-[140px] items-center justify-center rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10 dark:bg-slate-950/30">
+                <div className="flex min-h-[140px] items-center justify-center rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
                 {t('sessions.messageHistoryEmpty')}
               </div>
             ) : messagesLoading ? (
@@ -386,14 +386,14 @@ export default function SessionsView() {
                 {t('sessions.loadingMessages')}
               </div>
             ) : messages.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-muted-foreground dark:border-white/10 dark:bg-slate-950/30">
+                <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
                 {t('sessions.noMessages')}
               </div>
             ) : (
               <ScrollArea className="h-[360px] pr-3">
                 <div className="space-y-3">
                   {messages.map((message) => (
-                    <div key={message.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-white/10 dark:bg-slate-950/65 dark:text-slate-200">
+                    <div key={message.id} className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3 text-sm text-foreground">
                       <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                         <span className="font-medium uppercase tracking-[0.18em]">{message.role}</span>
                         <span>{formatRelativeTime(message.timestamp)}</span>
@@ -409,15 +409,15 @@ export default function SessionsView() {
       </div>
 
       {deleteTarget ? (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_32px_80px_-30px_rgba(15,23,42,0.35)] dark:border-white/10 dark:bg-slate-950">
+        <div className="app-overlay-scrim absolute inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm">
+          <div className="app-dialog-shell w-full max-w-md rounded-[28px] p-6">
             <div className="text-xl font-bold text-foreground">{t('sessions.deleteConfirmTitle')}</div>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
               {t('sessions.deleteConfirmText', {
                 name: deleteTarget.label?.trim() || deleteTarget.displayName || deleteTarget.key,
               })}
             </p>
-            <div className="mt-2 break-all rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+            <div className="mt-2 break-all rounded-2xl border border-border/80 bg-muted/35 px-3 py-2 font-mono text-xs text-muted-foreground">
               {deleteTarget.key}
             </div>
             <div className="mt-6 flex justify-end gap-3">
@@ -429,7 +429,7 @@ export default function SessionsView() {
                 {t('sessions.cancel')}
               </Button>
               <Button
-                className="rounded-2xl bg-red-600 px-4 text-white hover:bg-red-700"
+                className="rounded-2xl bg-destructive px-4 text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => void handleDeleteSession()}
               >
                 <Trash2 className="mr-2 h-4 w-4" />

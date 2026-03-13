@@ -171,7 +171,7 @@ function ChatAreaContent() {
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-background p-6 lg:p-8">
       <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-col gap-5">
         {gatewayError ? (
-          <div className="shrink-0 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+          <div className="shrink-0 rounded-3xl border border-primary/16 bg-primary/10 px-4 py-3 text-sm text-foreground dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
             {t('chat.gatewayError', { message: gatewayError })}
           </div>
         ) : null}
@@ -185,7 +185,7 @@ function ChatAreaContent() {
               {currentSession.title || currentSession.id}
             </div>
           </div>
-          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-muted-foreground dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
+          <div className="rounded-full border border-border/80 bg-muted/35 px-3 py-1 text-xs font-medium text-muted-foreground">
             {t('chat.messageCount', { count: visibleMessages.length })}
           </div>
         </div>
@@ -220,8 +220,8 @@ function ChatAreaContent() {
                       className={cn(
                         "max-w-[85%] rounded-[24px] border px-5 py-3 text-sm leading-7 shadow-sm",
                         message.role === 'user'
-                          ? "rounded-br-md border-blue-500 bg-blue-600 text-white shadow-[0_20px_40px_-28px_rgba(37,99,235,1)]"
-                          : "rounded-bl-md border-border/80 bg-slate-50 text-foreground dark:bg-slate-950/80"
+                          ? "rounded-br-md border-primary bg-primary text-primary-foreground shadow-[0_20px_40px_-28px_hsl(var(--primary)/0.7)]"
+                          : "rounded-bl-md border-border/80 bg-muted/35 text-foreground dark:bg-surface/90"
                       )}
                     >
                       <div className="prose prose-sm break-words dark:prose-invert">
@@ -237,7 +237,7 @@ function ChatAreaContent() {
                                     event.preventDefault()
                                     void openExternalLink(href)
                                   }}
-                                  className="text-blue-600 underline underline-offset-4 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200"
+                                  className="text-primary underline underline-offset-4 hover:text-primary/80"
                                 >
                                   {children}
                                 </a>
@@ -290,7 +290,7 @@ function ChatAreaContent() {
                       <AvatarImage src="/images/logo.png" />
                       <AvatarFallback>AI</AvatarFallback>
                     </Avatar>
-                    <div className="max-w-[85%] rounded-[24px] rounded-bl-md border border-border/80 bg-slate-50 px-5 py-3 text-sm text-foreground shadow-sm dark:bg-slate-950/80">
+                    <div className="max-w-[85%] rounded-[24px] rounded-bl-md border border-border/80 bg-muted/35 px-5 py-3 text-sm text-foreground shadow-sm dark:bg-surface/90">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="chat-typing-dots">
                           <span className="chat-typing-dot" />

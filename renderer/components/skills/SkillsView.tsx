@@ -47,7 +47,7 @@ function SkillToggle({
       onClick={onToggle}
       className={cn(
         'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors',
-        checked ? 'border-blue-500 bg-blue-600' : 'border-border bg-muted',
+        checked ? 'border-primary bg-primary' : 'border-border bg-muted',
         disabled && 'cursor-not-allowed opacity-60'
       )}
     >
@@ -63,15 +63,15 @@ function SkillToggle({
 
 function SkillIcon({ emoji, name }: { emoji: string | null; name: string }) {
   if (emoji) {
-    return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xl ring-1 ring-blue-100 dark:bg-blue-950/40 dark:ring-blue-900/60">
+      return (
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/16 bg-primary/10 text-xl dark:border-primary/24 dark:bg-primary/18">
         {emoji}
       </div>
     )
   }
 
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-muted/45 text-muted-foreground">
       <Puzzle className="h-4.5 w-4.5" />
     </div>
   )
@@ -300,7 +300,7 @@ export default function SkillsView() {
                     className={cn(
                       'rounded-xl border px-4 py-2 text-sm font-medium transition-colors',
                       sourceFilter === filter.key
-                        ? 'border-blue-500 bg-blue-600 text-white'
+                        ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-background text-foreground hover:bg-accent'
                     )}
                   >
@@ -347,7 +347,7 @@ export default function SkillsView() {
                   return (
                     <Card
                       key={skill.skillKey}
-                      className="rounded-[24px] border-blue-100/80 bg-card/95 shadow-sm transition-shadow hover:shadow-md dark:border-blue-950/50"
+                      className="rounded-[24px] border-border/80 bg-card/95 shadow-sm transition-shadow hover:border-primary/16 hover:shadow-md"
                     >
                       <CardHeader className="p-5 pb-3">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

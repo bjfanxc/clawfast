@@ -75,11 +75,11 @@ export default function ChatInput() {
 
   return (
     <div className="relative mx-auto flex w-full flex-col">
-      <div className="app-subpanel relative flex items-end rounded-[24px] border border-border/80 bg-card px-4 py-3 shadow-sm ring-0 backdrop-blur-xl transition-shadow focus-within:border-blue-200 focus-within:shadow-[0_24px_60px_-42px_rgba(37,99,235,0.45)] dark:bg-slate-950/80">
+      <div className="app-subpanel relative flex items-end rounded-[24px] border border-border/80 bg-card px-4 py-3 shadow-sm ring-0 backdrop-blur-xl transition-shadow focus-within:border-primary/28 focus-within:shadow-[0_24px_60px_-42px_hsl(var(--primary)/0.35)] dark:bg-surface/90">
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-200"
+          className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         >
           <Paperclip className="h-4 w-4" />
         </Button>
@@ -100,7 +100,7 @@ export default function ChatInput() {
         />
         <Button
           size="icon"
-          className="h-11 w-11 shrink-0 rounded-xl bg-blue-600 shadow-[0_18px_36px_-22px_rgba(37,99,235,1)] hover:bg-blue-700"
+          className="app-solid-primary h-11 w-11 shrink-0 rounded-xl shadow-[0_18px_36px_-24px_hsl(var(--primary)/0.55)]"
           disabled={!value.trim() || submitting}
           onClick={handleSend}
         >
