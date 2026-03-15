@@ -11,6 +11,7 @@ import { deleteSession, listSessions, patchSession } from './utils/sessions'
 import { installSkill, listSkills, openSkillsFolder, updateSkill } from './utils/skills'
 import { getUsageLogs, getUsageOverview, getUsageTimeSeries } from './utils/usage'
 import { getConfigSnapshot, setConfigSnapshot } from './utils/config'
+import { getBundledAppIconPath } from './utils/openclaw-paths'
 import { IPC_CHANNELS } from '../shared/ipc'
 import type { ListChannelsOptions } from '../shared/channels'
 import type { ConfigSetPayload } from '../shared/config'
@@ -22,11 +23,6 @@ const isProd = process.env.NODE_ENV === 'production'
 const shouldOpenDevTools = process.env.OPEN_DEVTOOLS === '1'
 const GATEWAY_PORT = 18789
 const openClawWsUrl = process.env.OPENCLAW_WS_URL?.trim() || `ws://localhost:${GATEWAY_PORT}`
-
-const getWindowIconPath = () => {
-  const baseDir = app.isPackaged ? process.resourcesPath : process.cwd()
-  return path.join(baseDir, 'resources', 'favicon.ico')
-}
 
 const gatewayClient = new GatewayClient({
   port: GATEWAY_PORT,
@@ -54,7 +50,7 @@ if (isProd) {
     height: 900,
     frame: false,
     autoHideMenuBar: true,
-    icon: getWindowIconPath(),
+    icon: getBundledAppIconPath(),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

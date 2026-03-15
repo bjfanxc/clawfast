@@ -15,6 +15,14 @@ export function getBundledNodeRuntimePath(): string {
   return process.execPath
 }
 
+export function getBundledAppIconPath(): string {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'icon.ico')
+  }
+
+  return path.join(process.cwd(), 'resources', 'icons', 'icon.ico')
+}
+
 export function getOpenClawDir(): string {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, 'openclaw')

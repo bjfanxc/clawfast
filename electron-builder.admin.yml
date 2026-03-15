@@ -10,16 +10,21 @@ files:
     filter:
       - package.json
       - app
+extraResources:
+  - from: resources/icons/icon.ico
+    to: icon.ico
 publish: null
 win:
   target: nsis
-  icon: favicon.ico
+  forceCodeSigning: false
+  verifyUpdateCodeSignature: false
+  icon: resources/icons/icon.ico
   legalTrademarks: ""
   signAndEditExecutable: false
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   packElevateHelper: false
-  installerIcon: favicon.ico
-  uninstallerIcon: favicon.ico
-  installerHeaderIcon: favicon.ico
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+  installerHeaderIcon: resources/icons/icon.ico
