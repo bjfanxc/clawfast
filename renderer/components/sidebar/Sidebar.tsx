@@ -22,7 +22,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useGatewayAvailability } from '@/hooks/useGatewayAvailability'
 import { loadChatHistory } from '@/domain/chat/chat-service'
 import { loadSessionsList } from '@/domain/sessions/sessions-service'
-import ConfigPreviewDialog from '@/components/sidebar/ConfigPreviewDialog'
+import { useSessionsSyncStore } from '@/store/sessions-sync-store'
+import ConfigPreviewDialog from './ConfigPreviewDialog'
 import type { SessionListEntry } from '../../../shared/sessions'
 
 export default function Sidebar() {
@@ -38,6 +39,7 @@ export default function Sidebar() {
   const toggleSidebarCollapsed = useNavigationStore((state) => state.toggleSidebarCollapsed)
   const { t } = useTranslation()
   const { gatewayConnected } = useGatewayAvailability()
+  const refreshSignal = useSessionsSyncStore((state) => state.refreshSignal)
   const [isClient, setIsClient] = React.useState(false)
   const [historySessions, setHistorySessions] = React.useState<SessionListEntry[]>([])
   const [loadingHistoryId, setLoadingHistoryId] = React.useState<string | null>(null)
@@ -59,27 +61,21 @@ export default function Sidebar() {
 
     let active = true
 
-    const syncSessions = () => {
-      void loadSessionsList()
-        .then((payload) => {
-          if (!active) {
-            return
-          }
-          setHistorySessions(payload.sessions ?? [])
-        })
-        .catch((error) => {
-          console.error('Failed to load sessions list', error)
-        })
-    }
-
-    syncSessions()
-    window.addEventListener('sessions-updated', syncSessions)
+    void loadSessionsList()
+      .then((payload) => {
+        if (!active) {
+          return
+        }
+        setHistorySessions(payload.sessions ?? [])
+      })
+      .catch((error) => {
+        console.error('Failed to load sessions list', error)
+      })
 
     return () => {
       active = false
-      window.removeEventListener('sessions-updated', syncSessions)
     }
-  }, [gatewayConnected, isClient])
+  }, [gatewayConnected, isClient, refreshSignal])
 
   const NAV_ITEMS = [
     { icon: MessageSquarePlus, label: isClient ? t('nav.newChat') : '...', id: 'new-chat', action: () => { createSession(); setCurrentView('chat') } },

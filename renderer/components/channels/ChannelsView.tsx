@@ -109,14 +109,6 @@ type FeishuDraft = {
   allowFrom: string
 }
 
-type ChannelDraftMap = {
-  telegram: TelegramDraft
-  discord: DiscordDraft
-  whatsapp: WhatsAppDraft
-  dingtalk: DingTalkDraft
-  feishu: FeishuDraft
-}
-
 type ChannelPreset = {
   id: ChannelType
   label: string
@@ -361,14 +353,6 @@ function formatTimestamp(timestamp: number | null) {
   }).format(new Date(timestamp))
 }
 
-function formatBooleanFlag(value: boolean | null, t: ReturnType<typeof useTranslation>['t']) {
-  if (value === null) {
-    return '-'
-  }
-
-  return value ? t('channels.booleanYes') : t('channels.booleanNo')
-}
-
 function ChannelIcon({ channelId }: { channelId: string }) {
   const iconAsset = getChannelIconAsset(channelId)
   const Icon = getChannelIcon(channelId)
@@ -383,7 +367,7 @@ function ChannelIcon({ channelId }: { channelId: string }) {
 
   if (Icon) {
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/35 dark:bg-primary/20 dark:text-primary">
         <Icon className="h-7 w-7" />
       </div>
     )
@@ -392,21 +376,6 @@ function ChannelIcon({ channelId }: { channelId: string }) {
   return (
     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-muted/55 text-muted-foreground">
       <Bot className="h-6 w-6" />
-    </div>
-  )
-}
-
-function ChannelInfoStat({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-2xl border border-border/70 bg-muted/20 px-3 py-2">
-      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">{label}</div>
-      <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
     </div>
   )
 }
@@ -1164,7 +1133,7 @@ export default function ChannelsView() {
         <div className="grid gap-4 lg:grid-cols-3">
           <Card className="rounded-[28px] border-border/80 bg-card/96 shadow-sm">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/35 dark:bg-primary/20 dark:text-primary">
                 <Radio className="h-7 w-7" />
               </div>
               <div>
@@ -1176,7 +1145,7 @@ export default function ChannelsView() {
 
           <Card className="rounded-[28px] border-border/80 bg-card/96 shadow-sm">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/24 dark:bg-primary/18 dark:text-primary">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/16 bg-primary/10 text-primary dark:border-primary/35 dark:bg-primary/20 dark:text-primary">
                 <Power className="h-7 w-7" />
               </div>
               <div>

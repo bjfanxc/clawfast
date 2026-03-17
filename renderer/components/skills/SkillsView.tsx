@@ -61,7 +61,7 @@ function SkillToggle({
   )
 }
 
-function SkillIcon({ emoji, name }: { emoji: string | null; name: string }) {
+function SkillIcon({ emoji }: { emoji: string | null }) {
   if (emoji) {
       return (
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/16 bg-primary/10 text-xl dark:border-primary/24 dark:bg-primary/18">
@@ -353,7 +353,7 @@ export default function SkillsView() {
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-3">
-                              <SkillIcon emoji={skill.emoji} name={skill.name} />
+                              <SkillIcon emoji={skill.emoji} />
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                                   <CardTitle className="truncate pt-0.5 text-base font-semibold leading-6">

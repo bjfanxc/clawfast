@@ -6,6 +6,7 @@ import { Minus, Square, X, Moon, Sun, Languages } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { closeWindow, maximizeWindow, minimizeWindow } from '@/domain/window/window-service'
 
 export default function TitleBar() {
   const { setTheme, theme, resolvedTheme } = useTheme()
@@ -17,21 +18,15 @@ export default function TitleBar() {
   }, [])
 
   const handleMinimize = () => {
-    if (window.ipc) {
-      window.ipc.minimize()
-    }
+    minimizeWindow()
   }
 
   const handleMaximize = () => {
-    if (window.ipc) {
-      window.ipc.maximize()
-    }
+    maximizeWindow()
   }
 
   const handleClose = () => {
-    if (window.ipc) {
-      window.ipc.close()
-    }
+    closeWindow()
   }
 
   const toggleTheme = () => {

@@ -15,6 +15,8 @@ import { useGatewayChatSync } from '@/hooks/useGatewayChatSync'
 import { useGatewayConnectionState } from '@/hooks/useGatewayConnectionState'
 import { useTranslation } from 'react-i18next'
 import { sendChatMessage } from '@/domain/chat/chat-service'
+import { openExternalUrl } from '@/domain/window/window-service'
+import { useChatUiSyncStore } from '@/store/chat-ui-sync-store'
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: Error }> {
   constructor(props: { children: React.ReactNode }) {
@@ -52,6 +54,9 @@ function ChatAreaContent() {
   const [waitingReply, setWaitingReply] = useState(false)
   const { gatewayError } = useGatewayConnectionState()
   const previousGatewayErrorRef = useRef<string | null>(null)
+  const userSentSignal = useChatUiSyncStore((state) => state.userSentSignal)
+  const assistantActivitySignal = useChatUiSyncStore((state) => state.assistantActivitySignal)
+  const notifyAssistantActivity = useChatUiSyncStore((state) => state.notifyAssistantActivity)
 
   useGatewayChatSync(currentSessionId)
 
@@ -75,28 +80,24 @@ function ChatAreaContent() {
   }, [isAtBottom, messages.length, messages[messages.length - 1]?.content])
 
   useEffect(() => {
-    const handleUserSent = () => {
-      setWaitingReply(true)
-      setIsAtBottom(true)
-      const el = scrollRef.current
-      if (!el) return
-      requestAnimationFrame(() => {
-        el.scrollTop = el.scrollHeight
-      })
+    if (userSentSignal <= 0) {
+      return
     }
+    setWaitingReply(true)
+    setIsAtBottom(true)
+    const el = scrollRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight
+    })
+  }, [userSentSignal])
 
-    const handleAssistantActivity = () => {
-      setWaitingReply(false)
+  useEffect(() => {
+    if (assistantActivitySignal <= 0) {
+      return
     }
-
-    window.addEventListener('chat-user-sent', handleUserSent)
-    window.addEventListener('chat-assistant-activity', handleAssistantActivity)
-
-    return () => {
-      window.removeEventListener('chat-user-sent', handleUserSent)
-      window.removeEventListener('chat-assistant-activity', handleAssistantActivity)
-    }
-  }, [])
+    setWaitingReply(false)
+  }, [assistantActivitySignal])
 
   // When switching sessions, jump to bottom immediately.
   useEffect(() => {
@@ -114,11 +115,11 @@ function ChatAreaContent() {
         status: 'sent',
         error: null,
       })
-      window.dispatchEvent(new Event('chat-assistant-activity'))
+      notifyAssistantActivity()
     }
 
     previousGatewayErrorRef.current = gatewayError
-  }, [addMessage, currentSessionId, gatewayError, t])
+  }, [addMessage, currentSessionId, gatewayError, notifyAssistantActivity, t])
 
   useEffect(() => {
     setIsAtBottom(true)
@@ -156,12 +157,12 @@ function ChatAreaContent() {
   }
 
   const openExternalLink = async (href?: string) => {
-    if (!href || !window.ipc?.openExternal) {
+    if (!href) {
       return
     }
 
     try {
-      await window.ipc.openExternal(href)
+      await openExternalUrl(href)
     } catch (error) {
       console.error('Failed to open external link', error)
     }

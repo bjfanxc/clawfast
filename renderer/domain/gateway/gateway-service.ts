@@ -1,34 +1,23 @@
 import type { GatewayConnectionState, GatewayStatusRequest } from '../../../shared/gateway'
+import { getIpcNamespace } from '@/domain/ipc/ipc-client'
 
 export function subscribeGatewayMessages(callback: (message: string) => void) {
-  if (!window.ipc?.gateway) {
-    throw new Error('Gateway API is not available')
-  }
-
-  return window.ipc.gateway.onMessage(callback)
+  const gateway = getIpcNamespace('gateway', 'Gateway API is not available')
+  return gateway.onMessage(callback)
 }
 
 export function subscribeGatewayErrors(callback: (message: string) => void) {
-  if (!window.ipc?.gateway) {
-    throw new Error('Gateway API is not available')
-  }
-
-  return window.ipc.gateway.onError(callback)
+  const gateway = getIpcNamespace('gateway', 'Gateway API is not available')
+  return gateway.onError(callback)
 }
 
 export function requestGatewayStatus() {
-  if (!window.ipc?.gateway) {
-    throw new Error('Gateway API is not available')
-  }
-
+  const gateway = getIpcNamespace('gateway', 'Gateway API is not available')
   const request: GatewayStatusRequest = { type: 'get-status' }
-  window.ipc.gateway.send(request)
+  gateway.send(request)
 }
 
 export function getGatewayConnectionState(): Promise<GatewayConnectionState> {
-  if (!window.ipc?.gateway) {
-    throw new Error('Gateway API is not available')
-  }
-
-  return window.ipc.gateway.getState()
+  const gateway = getIpcNamespace('gateway', 'Gateway API is not available')
+  return gateway.getState()
 }

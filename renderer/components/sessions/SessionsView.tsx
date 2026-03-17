@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { Loader2, RefreshCcw, Save, Trash2 } from 'lucide-react'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { loadChatHistory } from '@/domain/chat/chat-service'
 import { deleteSession, loadSessionsList, patchSession } from '@/domain/sessions/sessions-service'
+import { useSessionsSyncStore } from '@/store/sessions-sync-store'
 import { useToastStore } from '@/store/toast-store'
 import type { Message } from '@/store/chat-store'
 import type { SessionListEntry } from '../../../shared/sessions'
@@ -44,10 +45,6 @@ function renderValue(value: string | number | null | undefined) {
   return String(value)
 }
 
-function emitSessionsUpdated() {
-  window.dispatchEvent(new Event('sessions-updated'))
-}
-
 export default function SessionsView() {
   const { t } = useTranslation()
   const [sessions, setSessions] = React.useState<SessionListEntry[]>([])
@@ -61,6 +58,7 @@ export default function SessionsView() {
   const detailsCardRef = React.useRef<HTMLDivElement | null>(null)
   const [detailsCardHeight, setDetailsCardHeight] = React.useState<number | null>(null)
   const pushToast = useToastStore((state) => state.pushToast)
+  const requestSessionsRefresh = useSessionsSyncStore((state) => state.requestRefresh)
 
   const selectedSession = React.useMemo(
     () => sessions.find((session) => session.key === selectedKey) ?? null,
@@ -173,7 +171,7 @@ export default function SessionsView() {
       })
       const nextSessions = updated.sessions ?? []
       setSessions(nextSessions)
-      emitSessionsUpdated()
+      requestSessionsRefresh()
       pushToast('success', t('sessions.saved'))
     } catch (err) {
       pushToast('error', `${t('sessions.patchFailed')}: ${err instanceof Error ? err.message : String(err)}`)
@@ -195,7 +193,7 @@ export default function SessionsView() {
       const nextSessions = updated.sessions ?? []
       setSessions(nextSessions)
       setSelectedKey(nextSessions[0]?.key ?? null)
-      emitSessionsUpdated()
+      requestSessionsRefresh()
       pushToast('success', t('sessions.deleted'))
       setDeleteTarget(null)
     } catch (err) {
@@ -228,8 +226,8 @@ export default function SessionsView() {
             style={detailsCardHeight ? { height: detailsCardHeight } : undefined}
           >
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl font-bold">{t('sessions.sessionList')}</CardTitle>
-              <CardDescription>{t('sessions.sessionListHint')}</CardDescription>
+              <CardTitle className="text-2xl font-bold text-foreground dark:text-white">{t('sessions.sessionList')}</CardTitle>
+              <CardDescription className="text-foreground/75 dark:text-foreground/80">{t('sessions.sessionListHint')}</CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 pb-6">
               {loading ? (
@@ -250,7 +248,7 @@ export default function SessionsView() {
                         type="button"
                         className={`w-full rounded-2xl border px-3 py-3 text-left text-sm transition ${
                           selectedKey === session.key
-                            ? 'border-primary/18 bg-primary/10 text-foreground dark:border-primary/24 dark:bg-primary/18 dark:text-primary-foreground'
+                            ? 'border-primary/18 bg-primary/10 text-foreground dark:border-primary/40 dark:bg-primary/24 dark:text-white'
                             : 'border-border/80 bg-card/80 text-foreground hover:border-primary/14 hover:bg-primary/[0.04] dark:bg-card/65 dark:hover:border-primary/20 dark:hover:bg-primary/[0.08]'
                         }`}
                         onClick={() => setSelectedKey(session.key)}
@@ -294,7 +292,7 @@ export default function SessionsView() {
                             className="h-11 flex-1 rounded-2xl border-border/80 bg-card/82"
                           />
                           <Button
-                            className="h-11 shrink-0 rounded-2xl px-4"
+                            className="h-11 shrink-0 rounded-2xl px-4 dark:text-white"
                             onClick={() => void handleSaveLabel()}
                             disabled={savingLabel}
                           >
@@ -303,7 +301,7 @@ export default function SessionsView() {
                           </Button>
                           <Button
                             variant="outline"
-                            className="h-11 shrink-0 rounded-2xl px-4 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            className="h-11 shrink-0 rounded-2xl px-4 text-destructive hover:bg-destructive/10 hover:text-destructive dark:text-red-300 dark:hover:bg-red-500/20 dark:hover:text-red-200"
                             onClick={() => setDeleteTarget(selectedSession)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />

@@ -1,19 +1,17 @@
 const textCache = new WeakMap<object, string | null>();
 const thinkingCache = new WeakMap<object, string | null>();
 
-function processMessageText(text: string, role: string): string {
+function processMessageText(text: string): string {
   // Simplified version without stripping specific envelopes for now
   return text;
 }
 
 export function extractText(message: unknown): string | null {
-  const m = message as Record<string, unknown>;
-  const role = typeof m.role === "string" ? m.role : "";
   const raw = extractRawText(message);
   if (!raw) {
     return null;
   }
-  return processMessageText(raw, role);
+  return processMessageText(raw);
 }
 
 export function extractTextCached(message: unknown): string | null {

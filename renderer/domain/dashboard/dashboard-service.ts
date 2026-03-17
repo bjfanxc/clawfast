@@ -1,22 +1,18 @@
 import type { DashboardAccessInfo, DashboardOverviewPayload } from '../../../shared/dashboard'
 import { getOfflineDashboardOverview, isGatewayConnected } from '@/domain/gateway/gateway-guard'
+import { getIpcNamespace } from '@/domain/ipc/ipc-client'
 
 export async function loadDashboardAccessInfo(): Promise<DashboardAccessInfo> {
-  if (!window.ipc?.dashboard) {
-    throw new Error('Dashboard API is not available')
-  }
-
-  return window.ipc.dashboard.getAccessInfo()
+  const dashboard = getIpcNamespace('dashboard', 'Dashboard API is not available')
+  return dashboard.getAccessInfo()
 }
 
 export async function loadDashboardOverview(): Promise<DashboardOverviewPayload> {
-  if (!window.ipc?.dashboard) {
-    throw new Error('Dashboard API is not available')
-  }
+  const dashboard = getIpcNamespace('dashboard', 'Dashboard API is not available')
 
   if (!(await isGatewayConnected())) {
     return getOfflineDashboardOverview()
   }
 
-  return window.ipc.dashboard.getOverview()
+  return dashboard.getOverview()
 }

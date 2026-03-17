@@ -33,14 +33,20 @@ export function normalizeMessage(message: unknown): NormalizedMessage {
   if (typeof m.content === "string") {
     content = [{ type: "text", text: m.content }];
   } else if (Array.isArray(m.content)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content = m.content.map((item: any) => ({
-      ...item,
-      type: (item.type as MessageContentItem["type"]) || "text",
-      text: item.text as string | undefined,
-      name: item.name as string | undefined,
-      args: item.args || item.arguments,
-    }));
+    content = m.content.map((item) => {
+      const itemRecord = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      const itemType = itemRecord.type;
+      const itemText = itemRecord.text;
+      const itemName = itemRecord.name;
+
+      return {
+        ...itemRecord,
+        type: typeof itemType === "string" ? (itemType as MessageContentItem["type"]) : "text",
+        text: typeof itemText === "string" ? itemText : undefined,
+        name: typeof itemName === "string" ? itemName : undefined,
+        args: itemRecord.args ?? itemRecord.arguments,
+      };
+    });
   } else if (typeof m.text === "string") {
     content = [{ type: "text", text: m.text }];
   }

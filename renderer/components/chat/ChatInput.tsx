@@ -1,12 +1,15 @@
-﻿'use client'
+'use client'
 
 import React, { useState } from 'react'
 import { Loader2, Paperclip, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import type { Message } from '@/store/chat-store'
 import { useChatStore } from '@/store/chat-store'
 import { useTranslation } from 'react-i18next'
 import { useNavigationStore } from '@/store/navigation-store'
+import { useChatUiSyncStore } from '@/store/chat-ui-sync-store'
+import { useSessionsSyncStore } from '@/store/sessions-sync-store'
 import { sendChatMessage } from '@/domain/chat/chat-service'
 
 export default function ChatInput() {
@@ -17,6 +20,8 @@ export default function ChatInput() {
   const addMessage = useChatStore((state) => state.addMessage)
   const updateMessage = useChatStore((state) => state.updateMessage)
   const setCurrentView = useNavigationStore((state) => state.setCurrentView)
+  const notifyUserSent = useChatUiSyncStore((state) => state.notifyUserSent)
+  const requestSessionsRefresh = useSessionsSyncStore((state) => state.requestRefresh)
   const { t } = useTranslation()
 
   const handleSend = async () => {
@@ -30,7 +35,7 @@ export default function ChatInput() {
     setSubmitting(true)
     const runId = `pending-${Date.now()}`
 
-    const userMessage = {
+    const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user' as const,
       content,
@@ -42,7 +47,7 @@ export default function ChatInput() {
     
     addMessage(currentSessionId, userMessage)
     setCurrentView('chat')
-    window.dispatchEvent(new Event('chat-user-sent'))
+    notifyUserSent()
 
     try {
       const request = sendChatMessage(currentSessionId, content)
@@ -51,9 +56,9 @@ export default function ChatInput() {
         error: null,
         runId: request.runId,
       })
-      window.dispatchEvent(new Event('sessions-updated'))
+      requestSessionsRefresh()
       window.setTimeout(() => {
-        window.dispatchEvent(new Event('sessions-updated'))
+        requestSessionsRefresh()
       }, 1200)
     } catch (err) {
       console.error('Failed to send message:', err)

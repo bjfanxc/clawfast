@@ -3,12 +3,17 @@
 import React from 'react'
 
 import { useChatStore } from '@/store/chat-store'
+import { useChatUiSyncStore } from '@/store/chat-ui-sync-store'
+import { useSessionsSyncStore } from '@/store/sessions-sync-store'
 import { subscribeGatewayMessages } from '@/domain/gateway/gateway-service'
 import { applyGatewayChatMessage } from '@/lib/chat/gateway-events'
 
 export function useGatewayChatSync(currentSessionId: string | null) {
   const addMessage = useChatStore((state) => state.addMessage)
+  const appendMessageContent = useChatStore((state) => state.appendMessageContent)
   const updateMessage = useChatStore((state) => state.updateMessage)
+  const notifyAssistantActivity = useChatUiSyncStore((state) => state.notifyAssistantActivity)
+  const requestSessionsRefresh = useSessionsSyncStore((state) => state.requestRefresh)
   const assistantMessageIdsRef = React.useRef<Map<string, string>>(new Map())
   const sessionRefreshRunsRef = React.useRef<Set<string>>(new Set())
 
@@ -23,8 +28,8 @@ export function useGatewayChatSync(currentSessionId: string | null) {
         return
       }
       sessionRefreshRunsRef.current.add(runId)
-      window.dispatchEvent(new Event('sessions-updated'))
-      window.dispatchEvent(new Event('chat-assistant-activity'))
+      requestSessionsRefresh()
+      notifyAssistantActivity()
     }
 
     try {
@@ -49,11 +54,7 @@ export function useGatewayChatSync(currentSessionId: string | null) {
             appendAssistantMessage: (runId, content) => {
               const messageId = assistantMessageIdsRef.current.get(runId)
               if (!messageId) return
-              updateMessage(currentSessionId, messageId, {
-                content: `${useChatStore.getState().sessions
-                  .find((session) => session.id === currentSessionId)
-                  ?.messages.find((item) => item.id === messageId)?.content || ''}${content}`,
-              })
+              appendMessageContent(currentSessionId, messageId, content)
             },
             replaceAssistantMessage: (runId, content) => {
               const messageId = assistantMessageIdsRef.current.get(runId)
@@ -86,5 +87,5 @@ export function useGatewayChatSync(currentSessionId: string | null) {
       console.error('Failed to subscribe to gateway messages', error)
       return
     }
-  }, [addMessage, currentSessionId, updateMessage])
+  }, [addMessage, appendMessageContent, currentSessionId, notifyAssistantActivity, requestSessionsRefresh, updateMessage])
 }

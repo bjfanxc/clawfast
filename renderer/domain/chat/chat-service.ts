@@ -2,6 +2,7 @@ import type { Message } from '@/store/chat-store'
 import type { ChatHistoryResponse } from '../../../shared/chat'
 import type { GatewaySendChatRequest } from '../../../shared/gateway'
 import { isGatewayConnected } from '@/domain/gateway/gateway-guard'
+import { getIpcNamespace } from '@/domain/ipc/ipc-client'
 
 function createRunId() {
   return `run-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
@@ -22,13 +23,10 @@ function createChatRequest(sessionKey: string, message: string, runId: string): 
 }
 
 export function sendChatMessage(sessionKey: string, message: string) {
-  if (!window.ipc?.gateway) {
-    throw new Error('IPC Gateway not available')
-  }
-
+  const gateway = getIpcNamespace('gateway', 'IPC Gateway not available')
   const runId = createRunId()
   const request = createChatRequest(sessionKey, message, runId)
-  window.ipc.gateway.send(request)
+  gateway.send(request)
   return { runId }
 }
 
@@ -127,15 +125,13 @@ function normalizeHistoryMessage(message: unknown, index: number): Message | nul
 }
 
 export async function loadChatHistory(sessionKey: string): Promise<Message[]> {
-  if (!window.ipc?.chat) {
-    throw new Error('Chat API is not available')
-  }
+  const chat = getIpcNamespace('chat', 'Chat API is not available')
 
   if (!(await isGatewayConnected())) {
     return []
   }
 
-  const response = await window.ipc.chat.history(sessionKey) as ChatHistoryResponse
+  const response = await chat.history(sessionKey) as ChatHistoryResponse
   const messages = Array.isArray(response?.messages) ? response.messages : []
 
   return messages

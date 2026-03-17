@@ -1,30 +1,23 @@
 import type { SessionsDeletePayload, SessionsListPayload, SessionsPatchPayload } from '../../../shared/sessions'
 import { getOfflineSessionsList, isGatewayConnected } from '@/domain/gateway/gateway-guard'
+import { getIpcNamespace } from '@/domain/ipc/ipc-client'
 
 export async function loadSessionsList(): Promise<SessionsListPayload> {
-  if (!window.ipc?.sessions) {
-    throw new Error('Sessions API is not available')
-  }
+  const sessions = getIpcNamespace('sessions', 'Sessions API is not available')
 
   if (!(await isGatewayConnected())) {
     return getOfflineSessionsList()
   }
 
-  return window.ipc.sessions.list()
+  return sessions.list()
 }
 
 export async function patchSession(payload: SessionsPatchPayload): Promise<SessionsListPayload> {
-  if (!window.ipc?.sessions) {
-    throw new Error('Sessions API is not available')
-  }
-
-  return window.ipc.sessions.patch(payload)
+  const sessions = getIpcNamespace('sessions', 'Sessions API is not available')
+  return sessions.patch(payload)
 }
 
 export async function deleteSession(payload: SessionsDeletePayload): Promise<SessionsListPayload> {
-  if (!window.ipc?.sessions) {
-    throw new Error('Sessions API is not available')
-  }
-
-  return window.ipc.sessions.delete(payload)
+  const sessions = getIpcNamespace('sessions', 'Sessions API is not available')
+  return sessions.delete(payload)
 }

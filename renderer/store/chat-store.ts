@@ -26,10 +26,54 @@ interface ChatState {
   addMessage: (sessionId: string, message: Message) => void
   updateLastMessage: (sessionId: string, content: string | ((prev: string) => string)) => void
   updateMessage: (sessionId: string, messageId: string, patch: Partial<Message>) => void
+  appendMessageContent: (sessionId: string, messageId: string, content: string) => void
   setCurrentSession: (id: string) => void
 }
 
 const initialSessionId = 'session-1'
+
+function sortSessionsByUpdatedAt(sessions: Session[]) {
+  return [...sessions].sort((left, right) => right.updatedAt - left.updatedAt)
+}
+
+function updateSessionById(
+  sessions: Session[],
+  sessionId: string,
+  updater: (session: Session) => Session,
+  sortAfterUpdate = false
+) {
+  let changed = false
+  const nextSessions = sessions.map((session) => {
+    if (session.id !== sessionId) return session
+    const nextSession = updater(session)
+    if (nextSession !== session) {
+      changed = true
+    }
+    return nextSession
+  })
+  if (sortAfterUpdate && changed) {
+    return sortSessionsByUpdatedAt(nextSessions)
+  }
+  return nextSessions
+}
+
+function updateSessionMessages(
+  sessions: Session[],
+  sessionId: string,
+  updater: (messages: Message[], session: Session) => Message[]
+) {
+  return updateSessionById(sessions, sessionId, (session) => {
+    const nextMessages = updater(session.messages, session)
+    if (nextMessages === session.messages) {
+      return session
+    }
+    return {
+      ...session,
+      updatedAt: Date.now(),
+      messages: nextMessages,
+    }
+  }, true)
+}
 
 export const useChatStore = create<ChatState>((set) => ({
   sessions: [
@@ -52,7 +96,7 @@ export const useChatStore = create<ChatState>((set) => ({
       }
 
       return {
-        sessions: [newSession, ...state.sessions],
+        sessions: sortSessionsByUpdatedAt([newSession, ...state.sessions]),
         currentSessionId: sessionId,
       }
     })
@@ -65,7 +109,8 @@ export const useChatStore = create<ChatState>((set) => ({
 
       if (existing) {
         return {
-          sessions: state.sessions
+          sessions: sortSessionsByUpdatedAt(
+            state.sessions
             .map((item) =>
               item.id === session.id
                 ? {
@@ -75,7 +120,7 @@ export const useChatStore = create<ChatState>((set) => ({
                   }
                 : item
             )
-            .sort((left, right) => right.updatedAt - left.updatedAt),
+          ),
           currentSessionId: session.id,
         }
       }
@@ -88,34 +133,26 @@ export const useChatStore = create<ChatState>((set) => ({
       }
 
       return {
-        sessions: [nextSession, ...state.sessions].sort((left, right) => right.updatedAt - left.updatedAt),
+        sessions: sortSessionsByUpdatedAt([nextSession, ...state.sessions]),
         currentSessionId: session.id,
       }
     }),
   replaceSessionMessages: (sessionId, messages) =>
     set((state) => ({
-      sessions: state.sessions.map((session) =>
-        session.id === sessionId
-          ? {
-              ...session,
-              messages,
-              updatedAt: messages[messages.length - 1]?.timestamp ?? session.updatedAt,
-            }
-          : session
-      ),
+      sessions: updateSessionById(state.sessions, sessionId, (session) => ({
+        ...session,
+        messages,
+        updatedAt: messages[messages.length - 1]?.timestamp ?? session.updatedAt,
+      }), true),
     })),
   addMessage: (sessionId, message) =>
     set((state) => ({
-      sessions: state.sessions.map((session) =>
-        session.id === sessionId
-          ? { ...session, messages: [...session.messages, message], updatedAt: Date.now() }
-          : session
-      ),
+      sessions: updateSessionMessages(state.sessions, sessionId, (messages) => [...messages, message]),
     })),
   updateLastMessage: (sessionId, contentOrUpdater) =>
     set((state) => ({
-      sessions: state.sessions.map((session) => {
-        if (session.id !== sessionId || session.messages.length === 0) return session
+      sessions: updateSessionById(state.sessions, sessionId, (session) => {
+        if (session.messages.length === 0) return session
 
         const lastMessage = session.messages[session.messages.length - 1]
         if (lastMessage.role !== 'assistant') return session
@@ -123,6 +160,7 @@ export const useChatStore = create<ChatState>((set) => ({
         const nextContent = typeof contentOrUpdater === 'function'
           ? contentOrUpdater(lastMessage.content)
           : contentOrUpdater
+        if (nextContent === lastMessage.content) return session
 
         const messages = [...session.messages]
         messages[messages.length - 1] = {
@@ -132,26 +170,36 @@ export const useChatStore = create<ChatState>((set) => ({
 
         return {
           ...session,
-          messages,
           updatedAt: Date.now(),
+          messages,
         }
-      }),
+      }, true),
     })),
   updateMessage: (sessionId, messageId, patch) =>
     set((state) => ({
-      sessions: state.sessions.map((session) => {
-        if (session.id !== sessionId) return session
-
-        return {
-          ...session,
-          updatedAt: Date.now(),
-          messages: session.messages.map((message) =>
-            message.id === messageId
-              ? { ...message, ...patch }
-              : message
-          ),
+      sessions: updateSessionMessages(state.sessions, sessionId, (messages) =>
+        {
+          const index = messages.findIndex((message) => message.id === messageId)
+          if (index < 0) return messages
+          const nextMessages = [...messages]
+          nextMessages[index] = { ...nextMessages[index], ...patch }
+          return nextMessages
         }
-      }),
+      ),
+    })),
+  appendMessageContent: (sessionId, messageId, content) =>
+    set((state) => ({
+      sessions: updateSessionMessages(state.sessions, sessionId, (messages) =>
+        {
+          if (!content) return messages
+          const index = messages.findIndex((message) => message.id === messageId)
+          if (index < 0) return messages
+          const nextMessages = [...messages]
+          const currentMessage = nextMessages[index]
+          nextMessages[index] = { ...currentMessage, content: `${currentMessage.content}${content}` }
+          return nextMessages
+        }
+      ),
     })),
   setCurrentSession: (id) => set({ currentSessionId: id }),
 }))

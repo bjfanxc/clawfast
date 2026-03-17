@@ -5,6 +5,7 @@ import type { DashboardAccessInfo, DashboardOverviewPayload } from '../../../sha
 import type { SessionsListPayload } from '../../../shared/sessions'
 import type { SkillsSnapshot } from '../../../shared/skills'
 import type { UsageOverviewPayload } from '../../../shared/usage'
+import { getIpcNamespace } from '@/domain/ipc/ipc-client'
 import { getGatewayConnectionState } from './gateway-service'
 
 export async function isGatewayConnected() {
@@ -36,11 +37,8 @@ export async function getOfflineDashboardOverview(): Promise<DashboardOverviewPa
 }
 
 async function getDashboardAccessInfoDirect(): Promise<DashboardAccessInfo> {
-  if (!window.ipc?.dashboard) {
-    throw new Error('Dashboard API is not available')
-  }
-
-  return window.ipc.dashboard.getAccessInfo()
+  const dashboard = getIpcNamespace('dashboard', 'Dashboard API is not available')
+  return dashboard.getAccessInfo()
 }
 
 export function getOfflineSkillsSnapshot(): SkillsSnapshot {
