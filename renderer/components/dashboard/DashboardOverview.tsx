@@ -79,6 +79,60 @@ function formatMaskValue(value: string | null | undefined, t: ReturnType<typeof 
   return value?.trim() ? value : t('dashboard.notConfigured')
 }
 
+function getHeartbeatTimestamp(
+  health: DashboardHealthPayload | null,
+  lastHeartbeat: DashboardOverviewPayload['lastHeartbeat']
+) {
+  return lastHeartbeat?.ts ?? health?.ts ?? null
+}
+
+function getHeartbeatStatus(
+  health: DashboardHealthPayload | null,
+  lastHeartbeat: DashboardOverviewPayload['lastHeartbeat'],
+  t: ReturnType<typeof useTranslation>['t']
+) {
+  if (lastHeartbeat?.status?.trim()) {
+    return lastHeartbeat.status
+  }
+
+  if (health?.ok === true) {
+    return t('dashboard.snapshot.statusOk')
+  }
+
+  if (health?.ok === false) {
+    return t('dashboard.snapshot.statusOffline')
+  }
+
+  return t('dashboard.notAvailable')
+}
+
+function getHeartbeatReason(
+  health: DashboardHealthPayload | null,
+  lastHeartbeat: DashboardOverviewPayload['lastHeartbeat'],
+  t: ReturnType<typeof useTranslation>['t']
+) {
+  if (lastHeartbeat?.reason?.trim()) {
+    return lastHeartbeat.reason
+  }
+
+  if (health?.ok === true) {
+    return t('dashboard.details.heartbeatHealthy')
+  }
+
+  if (health?.ok === false) {
+    return t('dashboard.details.heartbeatUnavailable')
+  }
+
+  return t('dashboard.notAvailable')
+}
+
+function getHeartbeatDuration(
+  health: DashboardHealthPayload | null,
+  lastHeartbeat: DashboardOverviewPayload['lastHeartbeat']
+) {
+  return lastHeartbeat?.durationMs ?? health?.durationMs ?? null
+}
+
 function getGatewayPresence(presence: DashboardPresenceEntry[]) {
   return (
     presence.find((entry) => entry.reason === 'self' || entry.mode === 'gateway') ??
@@ -263,6 +317,10 @@ export default function DashboardOverview({ refreshSignal = 0 }: { refreshSignal
   const latestSession = sessionsList?.sessions?.[0] ?? null
   const statusLabel = health?.ok ? t('dashboard.snapshot.statusOk') : t('dashboard.snapshot.statusOffline')
   const statusTone = health?.ok ? 'success' : 'warn'
+  const heartbeatTimestamp = getHeartbeatTimestamp(health, lastHeartbeat)
+  const heartbeatStatus = getHeartbeatStatus(health, lastHeartbeat, t)
+  const heartbeatReason = getHeartbeatReason(health, lastHeartbeat, t)
+  const heartbeatDuration = getHeartbeatDuration(health, lastHeartbeat)
 
   return (
     <div className="min-w-0 space-y-6 overflow-x-hidden">
@@ -323,7 +381,7 @@ export default function DashboardOverview({ refreshSignal = 0 }: { refreshSignal
               />
               <SnapshotStat
                 label={t('dashboard.snapshot.lastHeartbeat')}
-                value={lastHeartbeat?.status ?? t('dashboard.notAvailable')}
+                value={formatRelativeTime(heartbeatTimestamp, t)}
               />
             </div>
 
@@ -399,9 +457,9 @@ export default function DashboardOverview({ refreshSignal = 0 }: { refreshSignal
             <DetailRow label={t('dashboard.details.channelsTotal')} value={String(channelCounts.total)} />
             <DetailRow label={t('dashboard.details.channelsConfigured')} value={String(channelCounts.configured)} />
             <DetailRow label={t('dashboard.details.channelsRunning')} value={String(channelCounts.running)} />
-            <DetailRow label={t('dashboard.details.heartbeatStatus')} value={lastHeartbeat?.status ?? t('dashboard.notAvailable')} />
-            <DetailRow label={t('dashboard.details.heartbeatReason')} value={lastHeartbeat?.reason ?? t('dashboard.notAvailable')} />
-            <DetailRow label={t('dashboard.details.heartbeatDuration')} value={formatDurationMs(lastHeartbeat?.durationMs, t)} />
+            <DetailRow label={t('dashboard.details.heartbeatStatus')} value={heartbeatStatus} />
+            <DetailRow label={t('dashboard.details.heartbeatReason')} value={heartbeatReason} />
+            <DetailRow label={t('dashboard.details.heartbeatDuration')} value={formatDurationMs(heartbeatDuration, t)} />
           </CardContent>
         </Card>
       </div>

@@ -44,7 +44,7 @@ export default function RootLayout({
           >
             <TitleBar />
             <GlobalToast />
-            <main className="flex min-h-0 flex-1 overflow-hidden px-4 pb-4">
+            <main className="flex min-h-0 flex-1 overflow-hidden px-4 pt-4 pb-4">
               {children}
             </main>
           </ThemeProvider>

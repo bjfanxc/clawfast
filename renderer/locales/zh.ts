@@ -118,6 +118,8 @@ const zh = {
       heartbeatStatus: '心跳状态',
       heartbeatReason: '心跳原因',
       heartbeatDuration: '心跳耗时',
+      heartbeatHealthy: '健康检查正常',
+      heartbeatUnavailable: '健康检查报告不可用',
     },
     notes: {
       title: '备注',

@@ -3,7 +3,7 @@
 import React from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import JSON5 from 'json5'
-import { Check, ChevronDown, ChevronRight, Loader2, PencilLine, Plus, RefreshCw, Save, Trash2, X } from 'lucide-react'
+import { Check, ChevronDown, Loader2, PencilLine, Plus, RefreshCw, Save, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -118,7 +118,11 @@ function prefixModelId(providerId: string, modelId: string) {
     return ''
   }
 
-  if (!normalizedProviderId || normalizedModelId.includes('/')) {
+  if (!normalizedProviderId) {
+    return normalizedModelId
+  }
+
+  if (normalizedModelId.startsWith(`${normalizedProviderId}/`)) {
     return normalizedModelId
   }
 
@@ -294,10 +298,33 @@ function getProviderModels(provider: ProviderDraft | undefined) {
   return toUniqueLines(provider?.models ?? '')
 }
 
+function resolveRouteProviderId(route: RouteDraft, providers: ProviderDraft[]) {
+  const explicitProviderId = route.defaultProviderId.trim()
+  if (explicitProviderId) {
+    return explicitProviderId
+  }
+
+  const primaryModel = route.primaryModel.trim()
+  if (primaryModel.includes('/')) {
+    const [providerId] = primaryModel.split('/')
+    if (providers.some((entry) => entry.id.trim() === providerId)) {
+      return providerId
+    }
+  }
+
+  const matchingProviders = providers.filter((entry) => getProviderModels(entry).includes(primaryModel))
+  if (matchingProviders.length === 1) {
+    return matchingProviders[0].id.trim()
+  }
+
+  return ''
+}
+
 function sanitizeRouteDraft(route: RouteDraft, providers: ProviderDraft[]) {
+  const providerId = resolveRouteProviderId(route, providers)
   const nextRoute: RouteDraft = {
     primaryModel: route.primaryModel.trim(),
-    defaultProviderId: route.defaultProviderId.trim(),
+    defaultProviderId: providerId,
     fallbackModels: Array.from(new Set(route.fallbackModels.map((item) => item.trim()).filter(Boolean))),
   }
 
@@ -382,7 +409,7 @@ function validateRouteDraft(
   t: ReturnType<typeof useTranslation>['t'],
 ): RouteFormErrors {
   const errors: RouteFormErrors = {}
-  const providerId = route.defaultProviderId.trim()
+  const providerId = resolveRouteProviderId(route, providers)
   const provider = providers.find((entry) => entry.id.trim() === providerId)
 
   if (!providerId) {
@@ -528,11 +555,101 @@ function createProviderDraft(type: ModelProviderType, existing: ProviderDraft[])
 
 const EMPTY_EDITOR: ProviderEditorState = {
   open: false,
-  step: 'select',
+  step: 'form',
   mode: 'create',
   index: null,
   draft: null,
   errors: {},
+}
+
+function ProviderEditorForm({
+  draft,
+  errors,
+  template,
+  showsApiField,
+  t,
+  onDraftChange,
+}: {
+  draft: ProviderDraft
+  errors: ProviderFormErrors
+  template: ReturnType<typeof getModelProviderTemplate> | undefined
+  showsApiField: boolean
+  t: ReturnType<typeof useTranslation>['t']
+  onDraftChange: (updater: (draft: ProviderDraft) => ProviderDraft, errorKey?: keyof ProviderFormErrors) => void
+}) {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start gap-4 rounded-[24px] border border-border/80 bg-muted/15 p-4">
+        <ProviderIcon type={draft.type} />
+        <div className="space-y-1">
+          <div className="text-lg font-semibold tracking-tight text-foreground">{t(getModelProviderLabelKey(draft.type))}</div>
+          <div className="text-sm leading-7 text-muted-foreground">{template?.defaultBaseUrl || t('models.providerTypeCustomHint')}</div>
+        </div>
+      </div>
+
+      <div className={cn('grid gap-4', showsApiField ? 'lg:grid-cols-2' : '')}>
+        <div className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerId')}</div>
+          <Input
+            value={draft.id}
+            onChange={(event) => onDraftChange((current) => ({ ...current, id: event.target.value }), 'id')}
+            placeholder={t('models.providerIdPlaceholder')}
+            className="h-11 rounded-2xl border-border/80 bg-muted/35"
+          />
+          <FieldError error={errors.id} />
+        </div>
+
+        {showsApiField ? (
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerApi')}</div>
+            <Input
+              value={draft.api}
+              onChange={(event) => onDraftChange((current) => ({ ...current, api: event.target.value }), 'api')}
+              placeholder={template?.defaultApi || 'openai-completions'}
+              className="h-11 rounded-2xl border-border/80 bg-muted/35"
+            />
+            <FieldError error={errors.api} />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerBaseUrl')}</div>
+          <Input
+            value={draft.baseUrl}
+            onChange={(event) => onDraftChange((current) => ({ ...current, baseUrl: event.target.value }), 'baseUrl')}
+            placeholder={template?.defaultBaseUrl || t('models.providerBaseUrlPlaceholder')}
+            className="h-11 rounded-2xl border-border/80 bg-muted/35"
+          />
+          <FieldError error={errors.baseUrl} />
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerApiKey')}</div>
+          <Input
+            value={draft.apiKey}
+            onChange={(event) => onDraftChange((current) => ({ ...current, apiKey: event.target.value }), 'apiKey')}
+            placeholder={template?.apiKeyPlaceholder || t('models.providerApiKeyPlaceholder')}
+            className="h-11 rounded-2xl border-border/80 bg-muted/35"
+          />
+          <FieldError error={errors.apiKey} />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerModels')}</div>
+        <Textarea
+          value={draft.models}
+          onChange={(event) => onDraftChange((current) => ({ ...current, models: event.target.value }), 'models')}
+          placeholder={template?.modelPlaceholder || t('models.providerModelsPlaceholder')}
+          className="min-h-[148px] resize-none rounded-2xl border-border/80 bg-muted/35"
+        />
+        <div className="text-xs text-muted-foreground">{t('models.providerModelsHelp')}</div>
+        <FieldError error={errors.models} />
+      </div>
+    </div>
+  )
 }
 
 export default function ModelConfigView() {
@@ -705,10 +822,10 @@ export default function ModelConfigView() {
   const openCreateProvider = () => {
     setProviderEditor({
       open: true,
-      step: 'select',
+      step: 'form',
       mode: 'create',
       index: null,
-      draft: null,
+      draft: createProviderDraft(MODEL_PROVIDER_TEMPLATES[0]?.type ?? 'openai', providers),
       errors: {},
     })
   }
@@ -729,6 +846,20 @@ export default function ModelConfigView() {
       return
     }
     setProviderEditor(EMPTY_EDITOR)
+  }
+
+  const updateProviderEditorDraft = (updater: (draft: ProviderDraft) => ProviderDraft, errorKey?: keyof ProviderFormErrors) => {
+    setProviderEditor((prev) => {
+      if (!prev.draft) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        draft: updater(prev.draft),
+        errors: errorKey ? { ...prev.errors, [errorKey]: undefined } : prev.errors,
+      }
+    })
   }
 
   return (
@@ -994,14 +1125,14 @@ export default function ModelConfigView() {
       <Dialog.Root open={providerEditor.open} onOpenChange={(open) => (open ? undefined : closeEditor())}>
         <Dialog.Portal>
           <Dialog.Overlay className="app-overlay-scrim fixed inset-0 z-50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-          <Dialog.Content className="app-dialog-shell fixed left-1/2 top-1/2 z-50 flex max-h-[86vh] w-[min(920px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+          <Dialog.Content className="app-dialog-shell fixed left-1/2 top-1/2 z-50 flex max-h-[86vh] w-[min(1120px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
             <div className="app-dialog-section flex items-start justify-between gap-4 border-b px-6 py-5">
               <div className="space-y-2">
                 <Dialog.Title className="text-xl font-semibold tracking-tight text-foreground">
                   {t(providerEditor.mode === 'edit' ? 'models.providerEditorTitleEdit' : 'models.providerEditorTitleCreate')}
                 </Dialog.Title>
                 <Dialog.Description className="text-sm leading-7 text-muted-foreground">
-                  {t(providerEditor.step === 'select' ? 'models.providerEditorHintSelect' : 'models.providerEditorHintForm')}
+                  {t('models.providerEditorHintForm')}
                 </Dialog.Description>
               </div>
               <Button type="button" variant="ghost" className="h-14 w-14 rounded-[20px] text-muted-foreground" onClick={closeEditor}>
@@ -1009,162 +1140,77 @@ export default function ModelConfigView() {
               </Button>
             </div>
             <div className="min-h-0 flex-1 overflow-auto px-6 py-5">
-              {providerEditor.step === 'select' ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {MODEL_PROVIDER_TEMPLATES.map((template) => (
-                    <button
-                      key={template.type}
-                      type="button"
-                      className="rounded-[24px] border border-border/80 bg-card/95 p-5 text-left shadow-sm transition hover:border-primary/20 hover:bg-primary/[0.03] dark:hover:border-primary/20 dark:hover:bg-primary/[0.04]"
-                      onClick={() =>
-                        setProviderEditor({
-                          open: true,
-                          step: 'form',
-                          mode: 'create',
-                          index: null,
-                          draft: createProviderDraft(template.type, providers),
-                          errors: {},
-                        })
-                      }
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <ProviderIcon type={template.type} />
-                          <div className="space-y-2">
-                            <div className="text-lg font-semibold tracking-tight text-foreground">{t(getModelProviderLabelKey(template.type))}</div>
-                            <div className="text-sm text-muted-foreground">{template.defaultBaseUrl || t('models.providerTypeCustomHint')}</div>
-                          </div>
-                        </div>
-                        <ChevronRight className="mt-1 h-4 w-4 text-muted-foreground" />
+              {providerEditor.draft ? (
+                providerEditor.mode === 'create' ? (
+                  <div className="grid min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+                    <div className="app-soft-surface rounded-[28px] p-4">
+                      <div className="space-y-3">
+                        {MODEL_PROVIDER_TEMPLATES.map((template) => {
+                          const active = providerEditor.draft?.type === template.type
+                          return (
+                            <button
+                              key={template.type}
+                              type="button"
+                              className={cn(
+                                'w-full rounded-[24px] border px-4 py-4 text-left transition',
+                                active ? 'app-selection-card-active' : 'app-selection-card',
+                              )}
+                              onClick={() =>
+                                setProviderEditor((prev) => ({
+                                  ...prev,
+                                  step: 'form',
+                                  mode: 'create',
+                                  index: null,
+                                  draft: createProviderDraft(template.type, providers),
+                                  errors: {},
+                                }))
+                              }
+                            >
+                              <div className="flex items-start gap-4">
+                                <ProviderIcon type={template.type} className="h-10 w-10 rounded-[18px]" />
+                                <div className="min-w-0 space-y-1.5">
+                                  <div className="text-lg font-semibold tracking-tight text-foreground">
+                                    {t(getModelProviderLabelKey(template.type))}
+                                  </div>
+                                  <div className="line-clamp-2 text-sm text-muted-foreground">
+                                    {template.defaultBaseUrl || t('models.providerTypeCustomHint')}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          )
+                        })}
                       </div>
-                    </button>
-                  ))}
-                </div>
-              ) : providerEditor.draft ? (
-                <div className="space-y-5">
-                  <div className="flex items-start gap-4 rounded-[24px] border border-border/80 bg-muted/15 p-4">
-                    <ProviderIcon type={providerEditor.draft.type} />
-                    <div className="space-y-1">
-                      <div className="text-lg font-semibold tracking-tight text-foreground">{t(getModelProviderLabelKey(providerEditor.draft.type))}</div>
-                      <div className="text-sm leading-7 text-muted-foreground">{editorTemplate?.defaultBaseUrl || t('models.providerTypeCustomHint')}</div>
-                    </div>
-                  </div>
-
-                  <div className={cn('grid gap-4', editorShowsApiField ? 'lg:grid-cols-2' : '')}>
-                    <div className="space-y-2">
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerId')}</div>
-                      <Input
-                        value={providerEditor.draft.id}
-                        onChange={(event) =>
-                          setProviderEditor((prev) => ({
-                            ...prev,
-                            draft: prev.draft ? { ...prev.draft, id: event.target.value } : prev.draft,
-                            errors: { ...prev.errors, id: undefined },
-                          }))
-                        }
-                        placeholder={t('models.providerIdPlaceholder')}
-                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
-                      />
-                      <FieldError error={providerEditor.errors.id} />
                     </div>
 
-                    {editorShowsApiField ? (
-                      <div className="space-y-2">
-                        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerApi')}</div>
-                        <Input
-                          value={providerEditor.draft.api}
-                          onChange={(event) =>
-                            setProviderEditor((prev) => ({
-                              ...prev,
-                              draft: prev.draft ? { ...prev.draft, api: event.target.value } : prev.draft,
-                              errors: { ...prev.errors, api: undefined },
-                            }))
-                          }
-                          placeholder={editorTemplate?.defaultApi || 'openai-completions'}
-                          className="h-11 rounded-2xl border-border/80 bg-muted/35"
-                        />
-                        <FieldError error={providerEditor.errors.api} />
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="space-y-2">
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerBaseUrl')}</div>
-                      <Input
-                        value={providerEditor.draft.baseUrl}
-                        onChange={(event) =>
-                          setProviderEditor((prev) => ({
-                            ...prev,
-                            draft: prev.draft ? { ...prev.draft, baseUrl: event.target.value } : prev.draft,
-                            errors: { ...prev.errors, baseUrl: undefined },
-                          }))
-                        }
-                        placeholder={editorTemplate?.defaultBaseUrl || t('models.providerBaseUrlPlaceholder')}
-                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
-                      />
-                      <FieldError error={providerEditor.errors.baseUrl} />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerApiKey')}</div>
-                      <Input
-                        value={providerEditor.draft.apiKey}
-                        onChange={(event) =>
-                          setProviderEditor((prev) => ({
-                            ...prev,
-                            draft: prev.draft ? { ...prev.draft, apiKey: event.target.value } : prev.draft,
-                            errors: { ...prev.errors, apiKey: undefined },
-                          }))
-                        }
-                        placeholder={editorTemplate?.apiKeyPlaceholder || t('models.providerApiKeyPlaceholder')}
-                        className="h-11 rounded-2xl border-border/80 bg-muted/35"
-                      />
-                      <FieldError error={providerEditor.errors.apiKey} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t('models.providerModels')}</div>
-                    <Textarea
-                      value={providerEditor.draft.models}
-                      onChange={(event) =>
-                        setProviderEditor((prev) => ({
-                          ...prev,
-                          draft: prev.draft ? { ...prev.draft, models: event.target.value } : prev.draft,
-                          errors: { ...prev.errors, models: undefined },
-                        }))
-                      }
-                      placeholder={editorTemplate?.modelPlaceholder || t('models.providerModelsPlaceholder')}
-                      className="min-h-[148px] resize-none rounded-2xl border-border/80 bg-muted/35"
+                    <ProviderEditorForm
+                      draft={providerEditor.draft}
+                      errors={providerEditor.errors}
+                      template={editorTemplate}
+                      showsApiField={editorShowsApiField}
+                      t={t}
+                      onDraftChange={updateProviderEditorDraft}
                     />
-                    <div className="text-xs text-muted-foreground">{t('models.providerModelsHelp')}</div>
-                    <FieldError error={providerEditor.errors.models} />
                   </div>
-                </div>
+                ) : (
+                  <ProviderEditorForm
+                    draft={providerEditor.draft}
+                    errors={providerEditor.errors}
+                    template={editorTemplate}
+                    showsApiField={editorShowsApiField}
+                    t={t}
+                    onDraftChange={updateProviderEditorDraft}
+                  />
+                )
               ) : null}
             </div>
 
-            <div className="app-dialog-section flex items-center justify-between gap-3 border-t px-6 py-4">
-              <div>
-                {providerEditor.step === 'form' && providerEditor.mode === 'create' ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="rounded-2xl"
-                    onClick={() => setProviderEditor((prev) => ({ ...prev, step: 'select', draft: null, errors: {} }))}
-                    disabled={savingProviders}
-                  >
-                    {t('models.providerEditorBack')}
-                  </Button>
-                ) : null}
-              </div>
-
+            <div className="app-dialog-section flex items-center justify-end gap-3 border-t px-6 py-4">
               <div className="flex items-center gap-3">
                 <Button type="button" variant="outline" className="rounded-2xl" onClick={closeEditor} disabled={savingProviders}>
                   {t('models.providerEditorCancel')}
                 </Button>
-                {providerEditor.step === 'form' ? (
+                {providerEditor.draft ? (
                   <Button type="button" className="rounded-2xl px-4" onClick={() => void handleProviderSubmit()} disabled={savingProviders}>
                     {savingProviders ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     {t('models.providerEditorSave')}

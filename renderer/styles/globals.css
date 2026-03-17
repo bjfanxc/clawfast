@@ -235,13 +235,15 @@
   }
   html {
     @apply h-full;
+    background-color: hsl(var(--surface-soft));
   }
   body {
     @apply h-full bg-background text-foreground antialiased;
+    background-color: hsl(var(--surface-soft));
     background-image:
-      radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
-      radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 24%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.94));
+      radial-gradient(circle at top left, hsl(var(--primary) / 0.08), transparent 28%),
+      radial-gradient(circle at bottom right, hsl(var(--primary) / 0.04), transparent 24%),
+      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--surface-soft) / 0.98));
     background-attachment: fixed;
   }
 

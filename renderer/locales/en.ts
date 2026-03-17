@@ -118,6 +118,8 @@ const en = {
       heartbeatStatus: 'Heartbeat status',
       heartbeatReason: 'Heartbeat reason',
       heartbeatDuration: 'Heartbeat duration',
+      heartbeatHealthy: 'Health check is normal',
+      heartbeatUnavailable: 'Health check reports unavailable',
     },
     notes: {
       title: 'Notes',

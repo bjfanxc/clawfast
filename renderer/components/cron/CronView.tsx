@@ -541,6 +541,19 @@ function TaskEditorDialog({
   const isAgentTurn = form.payloadKind === 'agentTurn'
   const showAnnounce = isAgentTurn && form.deliveryMode === 'announce'
   const showWebhook = isAgentTurn && form.deliveryMode === 'webhook'
+  const modeOptions = [
+    {
+      key: 'regular' as const,
+      label: '普通创建',
+      description: '适合常规任务，保留最常用字段。',
+    },
+    {
+      key: 'advanced' as const,
+      label: '高阶创建',
+      description: '补充完整配置，适合高级调度场景。',
+    },
+  ]
+  const activeMode = modeOptions.find((item) => item.key === formMode) ?? modeOptions[0]
 
   return (
     <div
@@ -562,32 +575,41 @@ function TaskEditorDialog({
           </button>
         </div>
 
-        <div className='app-dialog-section border-b px-6 py-4'>
-          <div className='inline-flex rounded-xl bg-muted p-1'>
-            {([
-              { key: 'regular', label: '普通创建' },
-              { key: 'advanced', label: '高阶创建' },
-            ] as const).map((item) => (
-              <button
-                key={item.key}
-                type='button'
-                onClick={() => onFormModeChange(item.key)}
-                className={cn(
-                  'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-                  formMode === item.key
-                    ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6'>
-          <div className='space-y-5'>
-            <FormSection title='基础配置' description='普通创建只展示最常用字段，部分关联配置会自动联动。'>
+          <div className='grid min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)]'>
+            <div className='app-dialog-subtle h-fit rounded-[28px] p-3'>
+              <div className='space-y-2'>
+                {modeOptions.map((item) => {
+                  const active = formMode === item.key
+                  return (
+                    <button
+                      key={item.key}
+                      type='button'
+                      onClick={() => onFormModeChange(item.key)}
+                      className={cn(
+                        'w-full rounded-[22px] border px-4 py-3.5 text-left transition',
+                        active ? 'app-selection-card-active' : 'app-selection-card'
+                      )}
+                    >
+                      <div className='space-y-0.5'>
+                        <div className='font-medium text-foreground'>{item.label}</div>
+                        <div className='text-xs leading-5 text-muted-foreground'>{item.description}</div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className='space-y-5'>
+              <div className='rounded-[24px] border border-border/80 bg-muted/15 px-5 py-4'>
+                <div className='space-y-1'>
+                  <div className='text-lg font-semibold tracking-tight text-foreground'>{activeMode.label}</div>
+                  <div className='text-sm leading-7 text-muted-foreground'>{activeMode.description}</div>
+                </div>
+              </div>
+
+              <FormSection title='基础配置' description='普通创建只展示最常用字段，部分关联配置会自动联动。'>
               <div className='grid gap-4 lg:grid-cols-2'>
                 <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>任务名称</span><Input value={form.name} onChange={(event) => onChange((current) => ({ ...current, name: event.target.value }))} className='rounded-2xl' /></label>
                 <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>说明</span><Input value={form.description} onChange={(event) => onChange((current) => ({ ...current, description: event.target.value }))} className='rounded-2xl' /></label>
@@ -600,20 +622,20 @@ function TaskEditorDialog({
               {form.scheduleKind === 'every' ? <div className='grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]'><label className='space-y-2 text-sm'><span className='font-medium text-foreground'>执行间隔</span><Input value={form.everyAmount} onChange={(event) => onChange((current) => ({ ...current, everyAmount: event.target.value }))} className='rounded-2xl' /></label><label className='space-y-2 text-sm'><span className='font-medium text-foreground'>单位</span><DropdownField value={form.everyUnit} onChange={(value) => onChange((current) => ({ ...current, everyUnit: value as EveryUnit }))} options={[{ value: 'minutes', label: '分钟' }, { value: 'hours', label: '小时' }, { value: 'days', label: '天' }]} /></label></div> : null}
               {isCron ? <div className='grid gap-4 lg:grid-cols-2'><label className='space-y-2 text-sm'><span className='font-medium text-foreground'>Cron 表达式</span><Input value={form.cronExpr} onChange={(event) => onChange((current) => ({ ...current, cronExpr: event.target.value }))} className='rounded-2xl' /></label><label className='space-y-2 text-sm'><span className='font-medium text-foreground'>时区</span><Input value={form.cronTz} onChange={(event) => onChange((current) => ({ ...current, cronTz: event.target.value }))} className='rounded-2xl' /></label></div> : null}
               <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>任务内容</span><Textarea value={form.payloadText} onChange={(event) => onChange((current) => ({ ...current, payloadText: event.target.value }))} className='min-h-[140px] rounded-2xl' /></label>
-            </FormSection>
-            {isAgentTurn ? (
-              <FormSection title='投递配置' description='普通模式支持不投递和渠道投递，高阶模式额外支持 Webhook。'>
+              </FormSection>
+              {isAgentTurn ? (
+                <FormSection title='投递配置' description='普通模式支持不投递和渠道投递，高阶模式额外支持 Webhook。'>
                 <div className='grid gap-4 lg:grid-cols-2'>
                   <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>投递方式</span><DropdownField value={form.deliveryMode} onChange={(value) => onChange((current) => syncDeliveryMode(current, value as DeliveryMode))} options={formMode === 'advanced' ? [{ value: 'none', label: '不投递' }, { value: 'announce', label: '渠道投递' }, { value: 'webhook', label: 'Webhook' }] : [{ value: 'none', label: '不投递' }, { value: 'announce', label: '渠道投递' }]} /></label>
                   {showAnnounce ? <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>渠道</span><DropdownField value={form.deliveryChannel} onChange={(value) => onChange((current) => ({ ...current, deliveryChannel: value }))} options={[{ value: 'telegram', label: 'Telegram' }, { value: 'discord', label: 'Discord' }, { value: 'slack', label: 'Slack' }, { value: 'whatsapp', label: 'WhatsApp' }, { value: 'mattermost', label: 'Mattermost' }, { value: 'signal', label: 'Signal' }, { value: 'imessage', label: 'iMessage' }, { value: 'last', label: 'Last Active' }]} /></label> : null}
                 </div>
                 {showAnnounce || showWebhook ? <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>目标地址</span><Input value={form.deliveryTo} onChange={(event) => onChange((current) => ({ ...current, deliveryTo: event.target.value }))} className='rounded-2xl' /></label> : null}
                 {showAnnounce ? <label className='flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm'><input type='checkbox' checked={form.deliveryBestEffort} onChange={(event) => onChange((current) => ({ ...current, deliveryBestEffort: event.target.checked }))} /><span>投递失败不阻断任务</span></label> : null}
-              </FormSection>
-            ) : null}
+                </FormSection>
+              ) : null}
 
-            {formMode === 'advanced' ? (
-              <FormSection title='高阶设置' description='这里补充 OpenClaw 文档里的进阶字段，包括关联约束后的完整配置。'>
+              {formMode === 'advanced' ? (
+                <FormSection title='高阶设置' description='这里补充 OpenClaw 文档里的进阶字段，包括关联约束后的完整配置。'>
                 <div className='grid gap-4 lg:grid-cols-2'>
                   <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>会话目标</span><DropdownField value={form.sessionTarget} onChange={(value) => onChange((current) => syncSessionTarget(current, value as CronFormState['sessionTarget']))} options={[{ value: 'isolated', label: '独立会话' }, { value: 'main', label: '主会话' }]} /></label>
                   <label className='space-y-2 text-sm'><span className='font-medium text-foreground'>唤醒方式</span><DropdownField value={form.wakeMode} onChange={(value) => onChange((current) => ({ ...current, wakeMode: value as CronFormState['wakeMode'] }))} options={[{ value: 'next-heartbeat', label: '下个心跳' }, { value: 'now', label: '立即唤醒' }]} /></label>
@@ -628,8 +650,9 @@ function TaskEditorDialog({
                   <label className='flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm'><input type='checkbox' checked={form.enabled} onChange={(event) => onChange((current) => ({ ...current, enabled: event.target.checked }))} /><span>启用此任务</span></label>
                   <label className={cn('flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm', !isAt && 'opacity-60')}><input type='checkbox' checked={isAt ? form.deleteAfterRun : false} disabled={!isAt} onChange={(event) => onChange((current) => ({ ...current, deleteAfterRun: event.target.checked }))} /><span>执行后删除</span></label>
                 </div>
-              </FormSection>
-            ) : null}
+                </FormSection>
+              ) : null}
+            </div>
           </div>
         </div>
 

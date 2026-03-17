@@ -77,11 +77,11 @@ type WhatsAppDraft = {
   enabled: boolean
   accountId: string
   name: string
-  authDir: string
-  defaultTo: string
   dmPolicy: string
   groupPolicy: string
   allowFrom: string
+  groupAllowFrom: string
+  selfChatMode: boolean
 }
 
 type DingTalkDraft = {
@@ -218,7 +218,7 @@ function getChannelPresets(
       label: 'WhatsApp',
       detailLabel: t(
         'channels.whatsapp.detailLabel',
-        isZh ? '会话账号、认证目录与默认发送目标。' : 'Session account, auth directory, and default delivery target.',
+        isZh ? 'WhatsApp Web 扫码绑定、私聊/群聊策略与号码白名单配置。' : 'WhatsApp Web linking, DM/group policies, and allowlist setup.',
       ),
     },
     {
@@ -520,31 +520,52 @@ function createEmptyDiscordDraft(): DiscordDraft {
 function buildWhatsAppDraft(config: Record<string, unknown> | null): WhatsAppDraft {
   const channel = getChannelConfig(config, 'whatsapp')
   const accounts = coerceRecord(channel?.accounts) ?? {}
-  const accountId = (typeof channel?.defaultAccount === 'string' && channel.defaultAccount) || Object.keys(accounts)[0] || 'main'
+  const accountId =
+    (typeof channel?.defaultAccount === 'string' && channel.defaultAccount) || Object.keys(accounts)[0] || 'whatsapp'
   const account = coerceRecord(accounts[accountId]) ?? {}
 
   return {
-    enabled: typeof channel?.enabled === 'boolean' ? channel.enabled : true,
+    enabled:
+      typeof account.enabled === 'boolean'
+        ? account.enabled
+        : typeof channel?.enabled === 'boolean'
+          ? channel.enabled
+          : true,
     accountId,
     name: typeof account.name === 'string' ? account.name : '',
-    authDir: typeof account.authDir === 'string' ? account.authDir : '',
-    defaultTo: typeof channel?.defaultTo === 'string' ? channel.defaultTo : '',
-    dmPolicy: typeof channel?.dmPolicy === 'string' ? channel.dmPolicy : 'pairing',
-    groupPolicy: typeof channel?.groupPolicy === 'string' ? channel.groupPolicy : 'allowlist',
-    allowFrom: stringifyCsvList(channel?.allowFrom),
+    dmPolicy:
+      typeof account.dmPolicy === 'string'
+        ? account.dmPolicy
+        : typeof channel?.dmPolicy === 'string'
+          ? channel.dmPolicy
+          : 'pairing',
+    groupPolicy:
+      typeof account.groupPolicy === 'string'
+        ? account.groupPolicy
+        : typeof channel?.groupPolicy === 'string'
+          ? channel.groupPolicy
+          : 'allowlist',
+    allowFrom: stringifyCsvList(account.allowFrom ?? channel?.allowFrom),
+    groupAllowFrom: stringifyCsvList(account.groupAllowFrom ?? channel?.groupAllowFrom),
+    selfChatMode:
+      typeof account.selfChatMode === 'boolean'
+        ? account.selfChatMode
+        : typeof channel?.selfChatMode === 'boolean'
+          ? channel.selfChatMode
+          : false,
   }
 }
 
 function createEmptyWhatsAppDraft(): WhatsAppDraft {
   return {
     enabled: true,
-    accountId: 'main',
+    accountId: 'whatsapp',
     name: '',
-    authDir: '',
-    defaultTo: '',
     dmPolicy: 'pairing',
     groupPolicy: 'allowlist',
     allowFrom: '',
+    groupAllowFrom: '',
+    selfChatMode: false,
   }
 }
 
@@ -552,7 +573,7 @@ function buildDingTalkDraft(config: Record<string, unknown> | null): DingTalkDra
   const channel = getChannelConfig(config, 'dingtalk')
   const accounts = coerceRecord(channel?.accounts) ?? {}
   const accountId =
-    (typeof channel?.defaultAccount === 'string' && channel.defaultAccount) || Object.keys(accounts)[0] || 'main'
+    (typeof channel?.defaultAccount === 'string' && channel.defaultAccount) || Object.keys(accounts)[0] || 'dingding'
   const account = coerceRecord(accounts[accountId]) ?? channel
 
   return {
@@ -571,7 +592,7 @@ function buildDingTalkDraft(config: Record<string, unknown> | null): DingTalkDra
 function createEmptyDingTalkDraft(): DingTalkDraft {
   return {
     enabled: true,
-    accountId: 'main',
+    accountId: 'dingding',
     name: '',
     clientId: '',
     clientSecret: '',
@@ -585,7 +606,8 @@ function createEmptyDingTalkDraft(): DingTalkDraft {
 function buildFeishuDraft(config: Record<string, unknown> | null): FeishuDraft {
   const channel = getChannelConfig(config, 'feishu')
   const accounts = coerceRecord(channel?.accounts) ?? {}
-  const accountId = Object.keys(accounts)[0] ?? 'main'
+  const accountId =
+    (typeof channel?.defaultAccount === 'string' && channel.defaultAccount) || Object.keys(accounts)[0] || 'feishu'
   const account = coerceRecord(accounts[accountId])
 
   return {
@@ -608,7 +630,7 @@ function buildFeishuDraft(config: Record<string, unknown> | null): FeishuDraft {
 function createEmptyFeishuDraft(): FeishuDraft {
   return {
     enabled: true,
-    accountId: 'main',
+    accountId: 'feishu',
     appId: '',
     appSecret: '',
     name: '',
@@ -677,21 +699,12 @@ function mergeDiscordConfig(base: Record<string, unknown>, draft: DiscordDraft) 
 function mergeWhatsAppConfig(base: Record<string, unknown>, draft: WhatsAppDraft) {
   const existing = getChannelConfig(base, 'whatsapp') ?? {}
   const next = { ...existing } as Record<string, unknown>
-  const accountId = draft.accountId.trim() || 'main'
+  const accountId = draft.accountId.trim() || 'whatsapp'
   const accounts = coerceRecord(next.accounts) ?? {}
   const currentAccount = { ...(coerceRecord(accounts[accountId]) ?? {}) }
 
   next.enabled = draft.enabled
   next.defaultAccount = accountId
-  next.dmPolicy = draft.dmPolicy
-  next.groupPolicy = draft.groupPolicy
-  next.allowFrom = parseCsvList(draft.allowFrom)
-
-  if (draft.defaultTo.trim()) {
-    next.defaultTo = draft.defaultTo.trim()
-  } else {
-    delete next.defaultTo
-  }
 
   currentAccount.enabled = draft.enabled
   if (draft.name.trim()) {
@@ -699,11 +712,11 @@ function mergeWhatsAppConfig(base: Record<string, unknown>, draft: WhatsAppDraft
   } else {
     delete currentAccount.name
   }
-  if (draft.authDir.trim()) {
-    currentAccount.authDir = draft.authDir.trim()
-  } else {
-    delete currentAccount.authDir
-  }
+  currentAccount.dmPolicy = draft.dmPolicy
+  currentAccount.groupPolicy = draft.groupPolicy
+  currentAccount.allowFrom = parseCsvList(draft.allowFrom)
+  currentAccount.groupAllowFrom = parseCsvList(draft.groupAllowFrom)
+  currentAccount.selfChatMode = draft.selfChatMode
 
   next.accounts = {
     ...accounts,
@@ -718,7 +731,7 @@ function mergeWhatsAppConfig(base: Record<string, unknown>, draft: WhatsAppDraft
 function mergeDingTalkConfig(base: Record<string, unknown>, draft: DingTalkDraft) {
   const existing = getChannelConfig(base, 'dingtalk') ?? {}
   const next = { ...existing } as Record<string, unknown>
-  const accountId = draft.accountId.trim() || 'main'
+  const accountId = draft.accountId.trim() || 'dingding'
   const accounts = coerceRecord(next.accounts) ?? {}
   const currentAccount = { ...(coerceRecord(accounts[accountId]) ?? {}) }
 
@@ -756,7 +769,7 @@ function mergeDingTalkConfig(base: Record<string, unknown>, draft: DingTalkDraft
 function mergeFeishuConfig(base: Record<string, unknown>, draft: FeishuDraft) {
   const existing = getChannelConfig(base, 'feishu') ?? {}
   const next = { ...existing } as Record<string, unknown>
-  const accountId = draft.accountId.trim() || 'main'
+  const accountId = draft.accountId.trim() || 'feishu'
   const existingAccounts = { ...(coerceRecord(next.accounts) ?? {}) }
   const existingAccount = { ...(coerceRecord(existingAccounts[accountId]) ?? {}) }
 
@@ -1121,6 +1134,7 @@ export default function ChannelsView() {
   const defaultAccountIds = snapshot?.channelDefaultAccountId ?? {}
   const channelCards = meta.map((entry) => deriveChannelCard(entry, channels, channelAccounts, defaultAccountIds))
   const visibleChannelCards = channelCards.filter((entry) => entry.configured)
+  const activeChannelPreset = channelPresets.find((entry) => entry.id === channelType) ?? channelPresets[0]
 
   const totalChannels = visibleChannelCards.length
   const configuredChannels = visibleChannelCards.length
@@ -1316,9 +1330,9 @@ export default function ChannelsView() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-auto px-6 py-5">
-              <div className="space-y-6">
-                <div className="app-dialog-subtle rounded-[28px] p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="grid min-h-0 gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+                <div className="app-dialog-subtle h-fit rounded-[28px] p-3">
+                  <div className="space-y-2">
                     {channelPresets.map((entry) => {
                       const active = channelType === entry.id
                       const iconAsset = getChannelIconAsset(entry.id)
@@ -1329,57 +1343,52 @@ export default function ChannelsView() {
                           key={entry.id}
                           type="button"
                           className={cn(
-                            'group relative overflow-hidden rounded-[24px] px-4 py-4 text-left transition',
+                            'w-full rounded-[22px] border px-4 py-3.5 text-left transition',
                             active ? 'app-selection-card-active' : 'app-selection-card',
                           )}
                           onClick={() => setChannelType(entry.id)}
                         >
-                          <div
-                            className={cn(
-                              'pointer-events-none absolute inset-x-0 top-0 h-1 rounded-full opacity-0 transition',
-                              active && 'opacity-100',
-                            )}
-                            style={{ background: 'linear-gradient(90deg, hsl(var(--primary) / 0.85), hsl(var(--accent) / 0.72))' }}
-                          />
-                          <div className="flex min-h-[68px] items-center gap-3">
-                          <div
-                            className={cn(
-                              'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition',
-                              active
-                                  ? 'border-border/90 bg-card shadow-[0_16px_32px_-28px_rgba(15,23,42,0.22)]'
-                                  : 'border-border/70 bg-card/85 text-muted-foreground',
-                            )}
-                          >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={cn(
+                                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition',
+                                active ? 'border-border/90 bg-card' : 'border-border/70 bg-card/85 text-muted-foreground',
+                              )}
+                            >
                               {iconAsset ? (
-                                <Image
-                                  src={iconAsset}
-                                  alt={entry.label}
-                                  width={26}
-                                  height={26}
-                                  className="h-6 w-6 object-contain"
-                                />
+                                <Image src={iconAsset} alt={entry.label} width={22} height={22} className="h-[22px] w-[22px] object-contain" />
                               ) : (
                                 <Icon className="h-5 w-5" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
-                              {entry.label}
+                            <div className="min-w-0 space-y-0.5">
+                              <div className="font-medium text-foreground">{entry.label}</div>
+                              <div className="line-clamp-2 text-xs leading-5 text-muted-foreground">{entry.detailLabel}</div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    )
+                        </button>
+                      )
                     })}
                   </div>
                 </div>
 
-                {configLoading ? (
-                  <div className="app-dialog-code flex min-h-[280px] items-center justify-center rounded-[24px] px-6 text-sm text-muted-foreground">
-                <Loader2 className="mr-3 h-4 w-4 animate-spin" />
-                {t('channels.configLoading')}
+                <div className="space-y-5">
+                  <div className="rounded-[24px] border border-border/80 bg-muted/15 px-5 py-4">
+                    <div className="flex items-start gap-4">
+                      <ChannelIcon channelId={activeChannelPreset.id} />
+                      <div className="space-y-1">
+                        <div className="text-lg font-semibold tracking-tight text-foreground">{activeChannelPreset.label}</div>
+                        <div className="text-sm leading-7 text-muted-foreground">{activeChannelPreset.detailLabel}</div>
+                      </div>
+                    </div>
                   </div>
-                ) : null}
+
+                  {configLoading ? (
+                    <div className="app-dialog-code flex min-h-[280px] items-center justify-center rounded-[24px] px-6 text-sm text-muted-foreground">
+                      <Loader2 className="mr-3 h-4 w-4 animate-spin" />
+                      {t('channels.configLoading')}
+                    </div>
+                  ) : null}
 
                 {!configLoading && channelType === 'telegram' ? (
                   <div className="space-y-4">
@@ -1501,7 +1510,7 @@ export default function ChannelsView() {
                         <Input
                           value={whatsAppDraft.accountId}
                           onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, accountId: event.target.value }))}
-                          placeholder={tx('channels.whatsapp.accountIdPlaceholder', 'main', 'main')}
+                          placeholder={tx('channels.whatsapp.accountIdPlaceholder', 'whatsapp', 'whatsapp')}
                           className="h-11 rounded-2xl"
                         />
                       </ChannelField>
@@ -1510,24 +1519,6 @@ export default function ChannelsView() {
                           value={whatsAppDraft.name}
                           onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, name: event.target.value }))}
                           placeholder={tx('channels.whatsapp.namePlaceholder', '可选展示名称', 'Optional display name')}
-                          className="h-11 rounded-2xl"
-                        />
-                      </ChannelField>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <ChannelField label={tx('channels.whatsapp.authDirLabel', '认证目录', 'Auth directory')}>
-                        <Input
-                          value={whatsAppDraft.authDir}
-                          onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, authDir: event.target.value }))}
-                          placeholder={tx('channels.whatsapp.authDirPlaceholder', '.openclaw/whatsapp/main', '.openclaw/whatsapp/main')}
-                          className="h-11 rounded-2xl"
-                        />
-                      </ChannelField>
-                      <ChannelField label={tx('channels.whatsapp.defaultToLabel', '默认发送目标', 'Default target')}>
-                        <Input
-                          value={whatsAppDraft.defaultTo}
-                          onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, defaultTo: event.target.value }))}
-                          placeholder={tx('channels.whatsapp.defaultToPlaceholder', '可选默认聊天目标', 'Optional default chat target')}
                           className="h-11 rounded-2xl"
                         />
                       </ChannelField>
@@ -1550,15 +1541,43 @@ export default function ChannelsView() {
                     </div>
                     <ChannelField
                       label={tx('channels.whatsapp.allowFromLabel', '允许联系人', 'Allowed contacts')}
-                      hint={tx('channels.whatsapp.allowFromHint', '使用逗号分隔发送者 ID 或手机号。', 'Comma-separated sender IDs or phone numbers.')}
+                      hint={tx(
+                        'channels.whatsapp.allowFromHint',
+                        '使用逗号分隔 E.164 手机号或 *，例如 8613xxxx。',
+                        'Comma-separated E.164 phone numbers or *.',
+                      )}
                     >
                       <Input
                         value={whatsAppDraft.allowFrom}
                         onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, allowFrom: event.target.value }))}
-                        placeholder={tx('channels.whatsapp.allowFromPlaceholder', '8613xxxx, my-team', '8613xxxx, my-team')}
+                        placeholder={tx('channels.whatsapp.allowFromPlaceholder', '8613xxxx, *', '8613xxxx, *')}
                         className="h-11 rounded-2xl"
                       />
                     </ChannelField>
+                    <ChannelField
+                      label={tx('channels.whatsapp.groupAllowFromLabel', '群聊白名单', 'Allowed groups')}
+                      hint={tx(
+                        'channels.whatsapp.groupAllowFromHint',
+                        '填写允许接入的群聊 ID，多个值用逗号分隔；允许全部可填写 *。',
+                        'Comma-separated group IDs allowed to talk to the assistant; use * to allow all.',
+                      )}
+                    >
+                      <Input
+                        value={whatsAppDraft.groupAllowFrom}
+                        onChange={(event) => setWhatsAppDraft((prev) => ({ ...prev, groupAllowFrom: event.target.value }))}
+                        placeholder={tx('channels.whatsapp.groupAllowFromPlaceholder', '1203xxxx@g.us, *', '1203xxxx@g.us, *')}
+                        className="h-11 rounded-2xl"
+                      />
+                    </ChannelField>
+                    <ChannelEnabledToggle
+                      checked={whatsAppDraft.selfChatMode}
+                      onCheckedChange={(checked) => setWhatsAppDraft((prev) => ({ ...prev, selfChatMode: checked }))}
+                      label={tx(
+                        'channels.whatsapp.selfChatModeLabel',
+                        '个人号码模式（允许自己给自己发消息）',
+                        'Personal number mode (allow self-chat)',
+                      )}
+                    />
                     <ChannelEnabledToggle
                       checked={whatsAppDraft.enabled}
                       onCheckedChange={(checked) => setWhatsAppDraft((prev) => ({ ...prev, enabled: checked }))}
@@ -1574,7 +1593,7 @@ export default function ChannelsView() {
                         <Input
                           value={dingTalkDraft.accountId}
                           onChange={(event) => setDingTalkDraft((prev) => ({ ...prev, accountId: event.target.value }))}
-                          placeholder={tx('channels.dingtalk.accountIdPlaceholder', 'main', 'main')}
+                          placeholder={tx('channels.dingtalk.accountIdPlaceholder', 'dingding', 'dingding')}
                           className="h-11 rounded-2xl"
                         />
                       </ChannelField>
@@ -1661,7 +1680,7 @@ export default function ChannelsView() {
                         <Input
                           value={feishuDraft.accountId}
                           onChange={(event) => setFeishuDraft((prev) => ({ ...prev, accountId: event.target.value }))}
-                          placeholder={t('channels.feishu.accountIdPlaceholder')}
+                          placeholder={tx('channels.feishu.accountIdPlaceholder', 'feishu', 'feishu')}
                           className="h-11 rounded-2xl"
                         />
                       </ChannelField>
@@ -1744,8 +1763,9 @@ export default function ChannelsView() {
                     />
                   </div>
                 ) : null}
-            </div>
+                </div>
               </div>
+            </div>
 
             <div className="app-dialog-section flex shrink-0 items-center justify-between gap-3 border-t px-6 py-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
