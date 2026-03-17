@@ -1261,19 +1261,6 @@ export default function ChannelsView() {
                                 </span>
                               ) : null}
                             </div>
-                            <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-                              <ChannelInfoStat label="Bot ID" value={channel.botId ?? '-'} />
-                              <ChannelInfoStat label={t('channels.botUsernameLabel')} value={channel.botUsername ?? '-'} />
-                              <ChannelInfoStat
-                                label={t('channels.canJoinGroupsLabel')}
-                                value={formatBooleanFlag(channel.canJoinGroups, t)}
-                              />
-                              <ChannelInfoStat
-                                label={t('channels.canReadAllGroupMessagesLabel')}
-                                value={formatBooleanFlag(channel.canReadAllGroupMessages, t)}
-                              />
-                            </div>
-
                             <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 xl:grid-cols-3">
                               {channel.defaultAccountId ? (
                                 <div>{t('channels.defaultAccount', { value: channel.defaultAccountId })}</div>
