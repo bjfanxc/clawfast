@@ -15,6 +15,11 @@ export function registerGatewayWindowIpc({ gatewayClient, mainWindow }: IpcRegis
     return { connected: gatewayClient.isConnected() }
   })
 
+  ipcMain.handle(IPC_CHANNELS.gateway.restart, async () => {
+    gatewayClient.restart()
+    return { ok: true }
+  })
+
   ipcMain.on(IPC_CHANNELS.window.minimize, () => {
     mainWindow.minimize()
   })

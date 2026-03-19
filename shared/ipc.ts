@@ -10,6 +10,7 @@
     message: 'gateway-message',
     error: 'gateway-error',
     state: 'gateway-state',
+    restart: 'gateway-restart',
   },
   chat: {
     history: 'chat:history',
@@ -23,6 +24,12 @@
   },
   channels: {
     list: 'channels:list',
+    pairingApprove: 'channels:pairing-approve',
+    requestWhatsAppQr: 'channels:whatsapp-request-qr',
+    cancelWhatsAppQr: 'channels:whatsapp-cancel-qr',
+    whatsappQr: 'channels:whatsapp-qr',
+    whatsappSuccess: 'channels:whatsapp-success',
+    whatsappError: 'channels:whatsapp-error',
   },
   cron: {
     snapshot: 'cron:snapshot',

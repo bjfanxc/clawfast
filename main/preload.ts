@@ -53,6 +53,33 @@ const handler = {
   channels: {
     list: (probe?: boolean) =>
       ipcRenderer.invoke(IPC_CHANNELS.channels.list, { probe: Boolean(probe) }) as Promise<ChannelsSnapshot>,
+    pairingApprove: (channelId: string, code: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.channels.pairingApprove, { channelId, code }) as Promise<{ id: string; accountId: string | null; channel: string }>,
+    requestWhatsAppQr: (accountId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.channels.requestWhatsAppQr, { accountId }) as Promise<{ success: boolean; error?: string }>,
+    cancelWhatsAppQr: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.channels.cancelWhatsAppQr) as Promise<{ success: boolean; error?: string }>,
+    onWhatsAppQr: (callback: (payload: { qr: string; raw: string }) => void) => {
+      const subscription = (_event: IpcRendererEvent, payload: { qr: string; raw: string }) => callback(payload)
+      ipcRenderer.on(IPC_CHANNELS.channels.whatsappQr, subscription)
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.channels.whatsappQr, subscription)
+      }
+    },
+    onWhatsAppSuccess: (callback: (payload: { accountId: string }) => void) => {
+      const subscription = (_event: IpcRendererEvent, payload: { accountId: string }) => callback(payload)
+      ipcRenderer.on(IPC_CHANNELS.channels.whatsappSuccess, subscription)
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.channels.whatsappSuccess, subscription)
+      }
+    },
+    onWhatsAppError: (callback: (message: string) => void) => {
+      const subscription = (_event: IpcRendererEvent, message: string) => callback(message)
+      ipcRenderer.on(IPC_CHANNELS.channels.whatsappError, subscription)
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.channels.whatsappError, subscription)
+      }
+    },
   },
   cron: {
     snapshot: () => ipcRenderer.invoke(IPC_CHANNELS.cron.snapshot) as Promise<CronSnapshot>,
@@ -91,6 +118,7 @@ const handler = {
   gateway: {
     send: (message: unknown) => ipcRenderer.send(IPC_CHANNELS.gateway.send, message),
     getState: () => ipcRenderer.invoke(IPC_CHANNELS.gateway.state) as Promise<GatewayConnectionState>,
+    restart: () => ipcRenderer.invoke(IPC_CHANNELS.gateway.restart) as Promise<{ ok: true }>,
     onMessage: (callback: (message: string) => void) => {
       const subscription = (_event: IpcRendererEvent, message: string) => callback(message)
       ipcRenderer.on(IPC_CHANNELS.gateway.message, subscription)

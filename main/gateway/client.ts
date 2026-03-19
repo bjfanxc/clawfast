@@ -29,10 +29,11 @@ export class GatewayClient {
   private gatewayProcess: ChildProcess | null = null
   private gatewayWs: WebSocket | null = null
   private launchPromise: Promise<void> | null = null
+  private shouldReconnect = true
   private pending = new Map<
     string,
     {
-      resolve: (value: unknown) => void
+      resolve: (value: unknown | PromiseLike<unknown>) => void
       reject: (error: unknown) => void
       timeout: ReturnType<typeof setTimeout>
     }
@@ -41,10 +42,18 @@ export class GatewayClient {
   constructor(private readonly options: GatewayClientOptions) {}
 
   start() {
+    this.shouldReconnect = true
     void this.connect()
   }
 
   stop() {
+    this.shouldReconnect = false
+    if (this.gatewayWs) {
+      this.gatewayWs.removeAllListeners()
+      this.gatewayWs.close()
+      this.gatewayWs = null
+    }
+
     if (this.gatewayProcess) {
       console.log('Killing Gateway process...')
       this.gatewayProcess.kill()
@@ -52,6 +61,12 @@ export class GatewayClient {
     }
 
     this.flushPending(new Error('Gateway client stopped'))
+  }
+
+  restart() {
+    this.stop()
+    this.shouldReconnect = true
+    void this.connect()
   }
 
   send(message: unknown) {
@@ -88,7 +103,11 @@ export class GatewayClient {
         reject(new Error(`Gateway request timed out: ${method}`))
       }, timeoutMs)
 
-      this.pending.set(id, { resolve, reject, timeout })
+      this.pending.set(id, {
+        resolve: (value) => resolve(value as T | PromiseLike<T>),
+        reject,
+        timeout,
+      })
       this.logGatewayFrame('OUT', frame)
       this.gatewayWs?.send(this.serialize(frame))
     })
@@ -192,7 +211,9 @@ export class GatewayClient {
         this.gatewayWs.removeAllListeners()
       }
       this.gatewayWs = null
-      setTimeout(() => this.connect(), 5000)
+      if (this.shouldReconnect) {
+        setTimeout(() => this.connect(), 5000)
+      }
     })
   }
 

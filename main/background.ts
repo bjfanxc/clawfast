@@ -5,6 +5,7 @@ import serve from 'electron-serve'
 import { GatewayClient } from './gateway/client'
 import { registerIpcHandlers } from './ipc/register-ipc-handlers'
 import { getBundledAppIconPath } from './utils/openclaw-paths'
+import { whatsAppLoginManager } from './utils/whatsapp-login'
 
 const isProd = process.env.NODE_ENV === 'production'
 const shouldOpenDevTools = process.env.OPEN_DEVTOOLS === '1'
@@ -65,6 +66,7 @@ if (isProd) {
 })()
 
 app.on('window-all-closed', () => {
+  void whatsAppLoginManager.stop()
   gatewayClient.stop()
   app.quit()
 })

@@ -10,9 +10,11 @@ import {
   Check,
   ChevronDown,
   CloudLightning,
+  Trash2,
   Gamepad2,
   Loader2,
   LockKeyhole,
+  PencilLine,
   Save,
   Plus,
   Power,
@@ -115,7 +117,9 @@ type ChannelPreset = {
   detailLabel: string
 }
 
-const DM_POLICY_OPTIONS = ['pairing', 'allowlist', 'open'] as const
+type ChannelDialogMode = 'create' | 'edit'
+
+const DM_POLICY_OPTIONS = ['pairing', 'allowlist', 'open', 'disabled'] as const
 const GROUP_POLICY_OPTIONS = ['open', 'allowlist', 'disabled'] as const
 
 function coerceRecord(value: unknown) {
@@ -417,6 +421,31 @@ function setPathValue(obj: Record<string, unknown>, path: string[], value: unkno
   cursor[path[path.length - 1]] = value
 }
 
+function deletePathValue(obj: Record<string, unknown>, path: string[]) {
+  const parents: Array<{ cursor: Record<string, unknown>; key: string }> = []
+  let cursor: Record<string, unknown> = obj
+
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const key = path[i]
+    const next = cursor[key]
+    if (!next || typeof next !== 'object' || Array.isArray(next)) {
+      return
+    }
+    parents.push({ cursor, key })
+    cursor = next as Record<string, unknown>
+  }
+
+  delete cursor[path[path.length - 1]]
+
+  for (let i = parents.length - 1; i >= 0; i -= 1) {
+    const { cursor: parent, key } = parents[i]
+    const value = parent[key]
+    if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value as Record<string, unknown>).length === 0) {
+      delete parent[key]
+    }
+  }
+}
+
 function getChannelConfig(config: Record<string, unknown> | null, channelId: string) {
   if (!config) {
     return null
@@ -433,6 +462,26 @@ function getChannelConfig(config: Record<string, unknown> | null, channelId: str
   }
 
   return null
+}
+
+function deleteChannelConfig(base: Record<string, unknown>, channelId: ChannelType) {
+  deletePathValue(base, ['channels', channelId])
+  delete base[channelId]
+
+  if (channelId === 'dingtalk') {
+    const plugins = coerceRecord(base.plugins)
+    const allow = Array.isArray(plugins?.allow) ? plugins.allow.filter((item): item is string => typeof item === 'string') : null
+    if (allow && plugins) {
+      const nextAllow = allow.filter((item) => item !== 'dingtalk')
+      if (nextAllow.length > 0) {
+        plugins.allow = nextAllow
+      } else {
+        delete plugins.allow
+      }
+    }
+  }
+
+  deletePathValue(base, ['plugins', 'entries', channelId])
 }
 
 function buildTelegramDraft(config: Record<string, unknown> | null): TelegramDraft {
@@ -917,12 +966,20 @@ export default function ChannelsView() {
   const [configLoading, setConfigLoading] = React.useState(false)
   const [configSaving, setConfigSaving] = React.useState(false)
   const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [dialogMode, setDialogMode] = React.useState<ChannelDialogMode>('create')
   const [channelType, setChannelType] = React.useState<ChannelType>('telegram')
   const [telegramDraft, setTelegramDraft] = React.useState<TelegramDraft>(createEmptyTelegramDraft)
   const [discordDraft, setDiscordDraft] = React.useState<DiscordDraft>(createEmptyDiscordDraft)
   const [whatsAppDraft, setWhatsAppDraft] = React.useState<WhatsAppDraft>(createEmptyWhatsAppDraft)
   const [dingTalkDraft, setDingTalkDraft] = React.useState<DingTalkDraft>(createEmptyDingTalkDraft)
   const [feishuDraft, setFeishuDraft] = React.useState<FeishuDraft>(createEmptyFeishuDraft)
+  const [whatsAppQrCode, setWhatsAppQrCode] = React.useState<string | null>(null)
+  const [whatsAppQrLoading, setWhatsAppQrLoading] = React.useState(false)
+  const [whatsAppQrLinkedAccount, setWhatsAppQrLinkedAccount] = React.useState<string | null>(null)
+  const [pairingDialogOpen, setPairingDialogOpen] = React.useState(false)
+  const [pairingChannelId, setPairingChannelId] = React.useState<ChannelType>('telegram')
+  const [pairingCode, setPairingCode] = React.useState('')
+  const [pairingSaving, setPairingSaving] = React.useState(false)
   const availableRef = React.useRef<HTMLDivElement | null>(null)
   const hasLoadedRef = React.useRef(false)
   const pushToast = useToastStore((state) => state.pushToast)
@@ -951,6 +1008,68 @@ export default function ChannelsView() {
     loadChannels(true)
   }, [loadChannels])
 
+  const parsedConfig = React.useMemo(() => {
+    if (!configSnapshot) {
+      return null
+    }
+
+    const rawText = typeof configSnapshot.raw === 'string' ? configSnapshot.raw : stringifyConfig(configSnapshot.config ?? {})
+    const parsed = parseJson(rawText)
+    return parsed.ok ? parsed.value : null
+  }, [configSnapshot])
+
+  const activeChannelHasConfig = React.useMemo(() => Boolean(getChannelConfig(parsedConfig, channelType)), [parsedConfig, channelType])
+  const activeChannelEnabled = React.useMemo(() => {
+    switch (channelType) {
+      case 'telegram':
+        return telegramDraft.enabled
+      case 'discord':
+        return discordDraft.enabled
+      case 'whatsapp':
+        return whatsAppDraft.enabled
+      case 'dingtalk':
+        return dingTalkDraft.enabled
+      case 'feishu':
+        return feishuDraft.enabled
+      default:
+        return false
+    }
+  }, [channelType, discordDraft.enabled, dingTalkDraft.enabled, feishuDraft.enabled, telegramDraft.enabled, whatsAppDraft.enabled])
+
+  const pairingSupportedChannelIds = React.useMemo(() => ['telegram', 'discord', 'whatsapp', 'feishu'] as ChannelType[], [])
+
+  React.useEffect(() => {
+    const channels = window.ipc?.channels
+    if (!channels) {
+      return
+    }
+
+    const removeQr = channels.onWhatsAppQr((payload: { qr: string; raw: string }) => {
+      setWhatsAppQrCode(`data:image/png;base64,${payload.qr}`)
+      setWhatsAppQrLoading(false)
+      setWhatsAppQrLinkedAccount(null)
+    })
+    const removeSuccess = channels.onWhatsAppSuccess((payload: { accountId: string }) => {
+      setWhatsAppQrLinkedAccount(payload.accountId)
+      setWhatsAppQrCode(null)
+      setWhatsAppQrLoading(false)
+      pushToast('success', t('channels.whatsapp.linked'))
+      void loadChannels(true)
+    })
+    const removeError = channels.onWhatsAppError((message: string) => {
+      setWhatsAppQrLoading(false)
+      if (message && message !== 'Logged out') {
+        pushToast('error', `${t('channels.whatsapp.loginFailed')}: ${message}`)
+      }
+    })
+
+    return () => {
+      removeQr()
+      removeSuccess()
+      removeError()
+    }
+  }, [loadChannels, pushToast, t])
+
   const refreshConfig = React.useCallback(async (hydrateDrafts = true) => {
     setConfigLoading(true)
     try {
@@ -975,18 +1094,213 @@ export default function ChannelsView() {
   }, [])
 
   const openAddDialog = async () => {
+    setDialogMode('create')
     setChannelType('telegram')
     setTelegramDraft(createEmptyTelegramDraft())
     setDiscordDraft(createEmptyDiscordDraft())
     setWhatsAppDraft(createEmptyWhatsAppDraft())
     setDingTalkDraft(createEmptyDingTalkDraft())
     setFeishuDraft(createEmptyFeishuDraft())
+    setWhatsAppQrCode(null)
+    setWhatsAppQrLoading(false)
+    setWhatsAppQrLinkedAccount(null)
     setDialogOpen(true)
     try {
       await refreshConfig(false)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       pushToast('error', `${t('channels.configLoadFailed')}: ${message}`)
+    }
+  }
+
+  const openEditDialog = async (nextChannelType: ChannelType) => {
+    setDialogMode('edit')
+    setChannelType(nextChannelType)
+    setDialogOpen(true)
+    try {
+      await refreshConfig(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      pushToast('error', `${t('channels.configLoadFailed')}: ${message}`)
+    }
+  }
+
+  React.useEffect(() => {
+    if (dialogOpen && channelType === 'whatsapp') {
+      return
+    }
+
+    setWhatsAppQrCode(null)
+    setWhatsAppQrLoading(false)
+    setWhatsAppQrLinkedAccount(null)
+    void window.ipc?.channels?.cancelWhatsAppQr?.()
+  }, [channelType, dialogOpen])
+
+  const handleGenerateWhatsAppQr = async () => {
+    const accountId = whatsAppDraft.accountId.trim() || 'whatsapp'
+    setWhatsAppQrLoading(true)
+    setWhatsAppQrCode(null)
+    setWhatsAppQrLinkedAccount(null)
+    try {
+      const result = await window.ipc.channels.requestWhatsAppQr(accountId)
+      if (!result.success) {
+        throw new Error(result.error || 'Unable to start WhatsApp login')
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setWhatsAppQrLoading(false)
+      pushToast('error', `${t('channels.whatsapp.loginFailed')}: ${message}`)
+    }
+  }
+
+  const handleDeleteChannel = async () => {
+    if (!configSnapshot?.hash || !parsedConfig) {
+      pushToast('error', t('channels.missingConfigHash'))
+      return
+    }
+
+    const confirmed = window.confirm(
+      t('channels.deleteConfirmText', {
+        name: activeChannelPreset.label,
+      }),
+    )
+    if (!confirmed) {
+      return
+    }
+
+    setConfigSaving(true)
+    try {
+      const base = { ...parsedConfig }
+      deleteChannelConfig(base, channelType)
+      const nextRaw = stringifyConfig(base)
+      const updated = await saveConfigSnapshot({
+        raw: nextRaw,
+        baseHash: configSnapshot.hash,
+      })
+      setConfigSnapshot(updated)
+      setWhatsAppQrCode(null)
+      setWhatsAppQrLoading(false)
+      setWhatsAppQrLinkedAccount(null)
+      setDialogOpen(false)
+      await window.ipc.gateway.restart()
+      pushToast('success', t('channels.deleteSuccess', { name: activeChannelPreset.label }))
+      await Promise.all([refreshConfig(), loadChannels(true)])
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      pushToast('error', `${t('channels.deleteFailed')}: ${message}`)
+    } finally {
+      setConfigSaving(false)
+    }
+  }
+
+  const handleDisableChannel = async () => {
+    if (!configSnapshot?.hash) {
+      pushToast('error', t('channels.missingConfigHash'))
+      return
+    }
+
+    const confirmed = window.confirm(
+      t('channels.disableConfirmText', {
+        name: activeChannelPreset.label,
+      }),
+    )
+    if (!confirmed) {
+      return
+    }
+
+    setConfigSaving(true)
+    try {
+      const rawText = typeof configSnapshot.raw === 'string' ? configSnapshot.raw : stringifyConfig(configSnapshot.config ?? {})
+      const parsed = parseJson(rawText)
+      if (!parsed.ok) {
+        throw new Error(parsed.error)
+      }
+
+      const base = { ...parsed.value }
+      switch (channelType) {
+        case 'telegram':
+          mergeTelegramConfig(base, { ...telegramDraft, enabled: false })
+          break
+        case 'discord':
+          mergeDiscordConfig(base, { ...discordDraft, enabled: false })
+          break
+        case 'whatsapp':
+          mergeWhatsAppConfig(base, { ...whatsAppDraft, enabled: false })
+          break
+        case 'dingtalk':
+          mergeDingTalkConfig(base, { ...dingTalkDraft, enabled: false })
+          break
+        case 'feishu':
+          mergeFeishuConfig(base, { ...feishuDraft, enabled: false })
+          break
+      }
+
+      const nextRaw = stringifyConfig(base)
+      const updated = await saveConfigSnapshot({
+        raw: nextRaw,
+        baseHash: configSnapshot.hash,
+      })
+      setConfigSnapshot(updated)
+      switch (channelType) {
+        case 'telegram':
+          setTelegramDraft((prev) => ({ ...prev, enabled: false }))
+          break
+        case 'discord':
+          setDiscordDraft((prev) => ({ ...prev, enabled: false }))
+          break
+        case 'whatsapp':
+          setWhatsAppDraft((prev) => ({ ...prev, enabled: false }))
+          break
+        case 'dingtalk':
+          setDingTalkDraft((prev) => ({ ...prev, enabled: false }))
+          break
+        case 'feishu':
+          setFeishuDraft((prev) => ({ ...prev, enabled: false }))
+          break
+      }
+      setDialogOpen(false)
+      await window.ipc.gateway.restart()
+      pushToast('success', t('channels.disableSuccess', { name: activeChannelPreset.label }))
+      await Promise.all([refreshConfig(), loadChannels(true)])
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      pushToast('error', `${t('channels.disableFailed')}: ${message}`)
+    } finally {
+      setConfigSaving(false)
+    }
+  }
+
+  const openPairingDialog = (nextChannelType: ChannelType) => {
+    setPairingChannelId(nextChannelType)
+    setPairingCode('')
+    setPairingDialogOpen(true)
+  }
+
+  const handleApprovePairing = async () => {
+    const code = pairingCode.trim().toUpperCase()
+    if (!code) {
+      pushToast('error', t('channels.pairing.codeRequired'))
+      return
+    }
+
+    setPairingSaving(true)
+    try {
+      const result = await window.ipc.channels.pairingApprove(pairingChannelId, code)
+      setPairingDialogOpen(false)
+      setPairingCode('')
+      pushToast(
+        'success',
+        t('channels.pairing.success', {
+          channel: pairingChannelId,
+        }),
+      )
+      pushToast('info', t('channels.pairing.approvedSender', { id: result.id }))
+      await loadChannels(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      pushToast('error', `${t('channels.pairing.failed')}: ${message}`)
+    } finally {
+      setPairingSaving(false)
     }
   }
 
@@ -1246,7 +1560,32 @@ export default function ChannelsView() {
                           </div>
                         </div>
 
-                        <div className="shrink-0" />
+                        <div className="shrink-0">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            {pairingSupportedChannelIds.includes(channel.id as ChannelType) ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="rounded-2xl"
+                                onClick={() => openPairingDialog(channel.id as ChannelType)}
+                              >
+                                <Check className="mr-2 h-4 w-4" />
+                                {t('channels.pairing.action')}
+                              </Button>
+                            ) : null}
+                            {(['telegram', 'discord', 'whatsapp', 'dingtalk', 'feishu'] as ChannelType[]).includes(channel.id as ChannelType) ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="rounded-2xl"
+                                onClick={() => void openEditDialog(channel.id as ChannelType)}
+                              >
+                                <PencilLine className="mr-2 h-4 w-4" />
+                                {t('channels.edit')}
+                              </Button>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -1263,14 +1602,11 @@ export default function ChannelsView() {
           <Dialog.Content className="app-dialog-shell fixed left-1/2 top-1/2 z-50 flex h-[min(88vh,860px)] w-[min(980px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] outline-none">
             <div className="app-dialog-section flex shrink-0 items-start justify-between gap-4 border-b px-6 py-5">
               <div>
-                <Dialog.Title className="text-xl font-semibold text-foreground">{t('channels.addTitle')}</Dialog.Title>
+                <Dialog.Title className="text-xl font-semibold text-foreground">
+                  {dialogMode === 'edit' ? t('channels.editTitle') : t('channels.addTitle')}
+                </Dialog.Title>
                 <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {t(
-                    'channels.addSubtitle',
-                    isZh
-                      ? '创建或更新 Telegram、Discord、WhatsApp、钉钉、飞书频道配置。'
-                      : 'Create or update Telegram, Discord, WhatsApp, DingTalk, and Feishu channel configuration.',
-                  )}
+                  {dialogMode === 'edit' ? t('channels.editSubtitle') : t('channels.addSubtitle')}
                 </Dialog.Description>
               </div>
               <Button
@@ -1525,6 +1861,49 @@ export default function ChannelsView() {
                         className="h-11 rounded-2xl"
                       />
                     </ChannelField>
+                    <div className="app-dialog-subtle space-y-4 rounded-2xl px-4 py-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium text-foreground">{t('channels.whatsapp.qrTitle')}</div>
+                          <div className="text-xs leading-5 text-muted-foreground">{t('channels.whatsapp.qrHint')}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-2xl"
+                            onClick={() => void handleGenerateWhatsAppQr()}
+                            disabled={whatsAppQrLoading}
+                          >
+                            {whatsAppQrLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+                            {t('channels.whatsapp.qrAction')}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-2xl"
+                            onClick={() => {
+                              void window.ipc.channels.cancelWhatsAppQr()
+                              setWhatsAppQrLoading(false)
+                              setWhatsAppQrCode(null)
+                            }}
+                          >
+                            {t('channels.whatsapp.cancelQr')}
+                          </Button>
+                        </div>
+                      </div>
+                      {whatsAppQrCode ? (
+                        <div className="flex flex-col items-center gap-3 rounded-2xl border border-border/80 bg-background/70 px-4 py-5">
+                          <img src={whatsAppQrCode} alt="WhatsApp QR" className="h-56 w-56 rounded-2xl bg-white p-3" />
+                          <div className="text-center text-xs leading-5 text-muted-foreground">{t('channels.whatsapp.qrSteps')}</div>
+                        </div>
+                      ) : null}
+                      {whatsAppQrLinkedAccount ? (
+                        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+                          {t('channels.whatsapp.qrLinked', { accountId: whatsAppQrLinkedAccount })}
+                        </div>
+                      ) : null}
+                    </div>
                     <ChannelEnabledToggle
                       checked={whatsAppDraft.selfChatMode}
                       onCheckedChange={(checked) => setWhatsAppDraft((prev) => ({ ...prev, selfChatMode: checked }))}
@@ -1732,6 +2111,30 @@ export default function ChannelsView() {
                 )}
               </div>
               <div className="flex items-center gap-3">
+                {dialogMode === 'edit' && activeChannelHasConfig && activeChannelEnabled ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-2xl"
+                    onClick={() => void handleDisableChannel()}
+                    disabled={configLoading || configSaving}
+                  >
+                    <Power className="mr-2 h-4 w-4" />
+                    {t('channels.disable')}
+                  </Button>
+                ) : null}
+                {dialogMode === 'edit' && activeChannelHasConfig ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => void handleDeleteChannel()}
+                    disabled={configLoading || configSaving}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t('channels.delete')}
+                  </Button>
+                ) : null}
                 <Button type="button" variant="outline" className="app-soft-button rounded-2xl" onClick={() => setDialogOpen(false)}>
                   {t('channels.cancel')}
                 </Button>
@@ -1743,6 +2146,63 @@ export default function ChannelsView() {
                 >
                   {configSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {t('channels.save')}
+                </Button>
+              </div>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      <Dialog.Root open={pairingDialogOpen} onOpenChange={setPairingDialogOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="app-overlay-scrim fixed inset-0 z-50 backdrop-blur-sm" />
+          <Dialog.Content className="app-dialog-shell fixed left-1/2 top-1/2 z-50 flex w-[min(520px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[32px] outline-none">
+            <div className="app-dialog-section border-b px-6 py-5">
+              <Dialog.Title className="text-xl font-semibold text-foreground">{t('channels.pairing.title')}</Dialog.Title>
+              <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+                {t('channels.pairing.subtitle')}
+              </Dialog.Description>
+            </div>
+
+            <div className="app-dialog-section space-y-4 px-6 py-5">
+              <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+                <div className="font-medium text-foreground">{t('channels.pairing.commandLabel')}</div>
+                <div className="mt-2 break-all font-mono text-xs">
+                  {`openclaw pairing approve ${pairingChannelId} ${pairingCode.trim().toUpperCase() || '<CODE>'}`}
+                </div>
+              </div>
+
+              <ChannelField label={t('channels.pairing.codeLabel')} hint={t('channels.pairing.codeHint')}>
+                <Input
+                  value={pairingCode}
+                  onChange={(event) => setPairingCode(event.target.value.toUpperCase())}
+                  placeholder={t('channels.pairing.codePlaceholder')}
+                  className="h-11 rounded-2xl"
+                  maxLength={32}
+                />
+              </ChannelField>
+            </div>
+
+            <div className="app-dialog-section flex items-center justify-between gap-3 border-t px-6 py-4">
+              <div className="text-xs text-muted-foreground">{t('channels.pairing.supportedHint', { channel: pairingChannelId })}</div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="app-soft-button rounded-2xl"
+                  onClick={() => setPairingDialogOpen(false)}
+                  disabled={pairingSaving}
+                >
+                  {t('channels.cancel')}
+                </Button>
+                <Button
+                  type="button"
+                  className="app-solid-primary rounded-2xl"
+                  onClick={() => void handleApprovePairing()}
+                  disabled={pairingSaving}
+                >
+                  {pairingSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                  {t('channels.pairing.confirm')}
                 </Button>
               </div>
             </div>
